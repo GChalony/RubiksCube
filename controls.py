@@ -20,6 +20,7 @@ class NavigationController:
 
     def __init__(self, cube):
         self.keys_pressed = {}
+        self.mouse_pos_on_click = None
         self.cube = cube
         self.camera_rot = Rotation.identity()
         self.rot_delta = Rotation.from_rotvec([0, self.ROT_DELTA, 0])
@@ -45,28 +46,53 @@ class NavigationController:
             # Unregister key down
             elif event.type == pg.KEYUP:
                 self.keys_pressed.pop(event.key, None)
+        elif event.type == pg.MOUSEBUTTONDOWN:
+            self.mouse_pos_on_click = pg.mouse.get_pos()
+        elif event.type == pg.MOUSEBUTTONUP:
+            self.mouse_pos_on_click = None
+
+    def _update_view(self):
+        # Reset view then recompute camera position
+        glPopMatrix()
+        glPushMatrix()
+        rotvec = self.camera_rot.as_rotvec()
+        glRotate(np.degrees(np.linalg.norm(rotvec)), *rotvec)
 
     def animate(self):
+        self._animate_keys()
+        self._animate_mouse()
+
+    def _animate_keys(self):
         n = pg.time.get_ticks()
         for key, time in self.keys_pressed.items():
-            rot_speed = self.rot_speed(n - time)
+            rot_speed = self._rot_speed(n - time)
             if key in [pg.K_RIGHT, pg.K_LEFT]:
                 sign = 1 if key == pg.K_RIGHT else -1
                 rot = Rotation.from_rotvec([0, sign * rot_speed, 0])
-                self.camera_rot = self.camera_rot * rot
+                self.camera_rot = rot * self.camera_rot
             else:
                 sign = 1 if key == pg.K_UP else -1
                 rot = Rotation.from_rotvec([sign * rot_speed, 0, 0])
                 self.camera_rot = rot * self.camera_rot
-        self.camera_rot = self.camera_rot * self.rot_delta
-        rotvec = self.camera_rot.as_rotvec()
-        # Reset view then recompute camera position
-        glPopMatrix()
-        glPushMatrix()
-        glRotate(np.degrees(np.linalg.norm(rotvec)), *rotvec)
+        self.camera_rot = self.rot_delta * self.camera_rot
+        self._update_view()
 
-    def rot_speed(self, dt):
-        return dt / 10000
+    def _rot_speed(self, dt):
+        return dt / 2000
+
+    def _animate_mouse(self):
+        if self.mouse_pos_on_click is not None:
+            prev_x, prev_y = self.mouse_pos_on_click
+            x, y = pg.mouse.get_pos()
+            dx, dy = x - prev_x, y - prev_y
+            # Find vector around which to rotate
+            scale = 100
+            v = [dy / scale, dx / scale, 0]
+            rot = Rotation.from_rotvec(v)
+            print(v)
+            self.camera_rot = rot * self.camera_rot
+            self.mouse_pos_on_click = (x, y)
+
 
 
 class CubeController:
