@@ -16,7 +16,7 @@ from utils import Color
 
 
 @dataclass
-class RotationAnimation:
+class FaceRotationAnimation:
     face: str
     start: int
     current_angle: float
@@ -30,22 +30,19 @@ def handle_events():
             pygame.quit()
             quit()
         if event.type == pygame.KEYDOWN:
-            if cube._animation is None:
-                reverse = event.mod == pygame.KMOD_LSHIFT or event.mod == pygame.KMOD_RSHIFT
-                if event.key == pygame.K_f:
-                    cube.move_face("F", reverse=reverse)
-                elif event.key == pygame.K_b:
-                    cube.move_face("B", reverse=reverse)
-                elif event.key == pygame.K_l:
-                    cube.move_face("L", reverse=reverse)
-                elif event.key == pygame.K_r:
-                    cube.move_face("R", reverse=reverse)
-                elif event.key == pygame.K_u:
-                    cube.move_face("U", reverse=reverse)
-                elif event.key == pygame.K_d:
-                    cube.move_face("D", reverse=reverse)
-            else:
-                print("Warning: animation not finished!")
+            reverse = event.mod == pygame.KMOD_LSHIFT or event.mod == pygame.KMOD_RSHIFT
+            if event.key == pygame.K_f:
+                cube.move_face("F", reverse=reverse)
+            elif event.key == pygame.K_b:
+                cube.move_face("B", reverse=reverse)
+            elif event.key == pygame.K_l:
+                cube.move_face("L", reverse=reverse)
+            elif event.key == pygame.K_r:
+                cube.move_face("R", reverse=reverse)
+            elif event.key == pygame.K_u:
+                cube.move_face("U", reverse=reverse)
+            elif event.key == pygame.K_d:
+                cube.move_face("D", reverse=reverse)
 
 
 class RubiksCube:
@@ -67,9 +64,8 @@ class RubiksCube:
         ]
 
         self.faces = self.default_faces
-        self.rotation = Rotation.identity()
 
-        self._animation: List[RotationAnimation] = []  # Stores animations to move faces
+        self._animation: List[FaceRotationAnimation] = []  # Stores animations to move faces
 
     @cached_property
     def default_positions(self):
@@ -96,7 +92,8 @@ class RubiksCube:
             faces[face] = cubes
         return faces
 
-    def compute_state(self):
+    def compute_faces(self):
+        # Assumes the cube is never moved / rotated / scaled
         # Find permutation from start
         positions = np.array([c.position for c in self.cubes])
         _, permutation = np.where(cdist(positions, self.default_positions).T < self.offset / 10)
@@ -143,20 +140,19 @@ class RubiksCube:
         anim.current_angle += speed_deg
 
     def finish_animation(self):
-        # Fix cubes position to avoid rounding errors
-        # Assumes the cube is never moved / rotated / scaled
+        # Round cubes position
         positions = np.array([c.position for c in self.cubes])
         round_positions = np.round(positions / self.offset) * self.offset
-        # Round cubes position
         for c, pos in zip(self.cubes, round_positions):
             c.position = pos
 
-        self.compute_state()
-
+        self.compute_faces()
         self._animation.pop(0)
 
     def move_face(self, face, angle=90, reverse=False):
-        self._animation = RotationAnimation(face, pygame.time.get_ticks(), 0, angle, reverse)
+        self._animation.append(
+            FaceRotationAnimation(face, pygame.time.get_ticks(), 0, angle, reverse)
+        )
 
     def shuffle(self):
         # Shuffles only one way (no U')...
@@ -168,18 +164,17 @@ class RubiksCube:
         rots_cube = {i: Rotation.identity() for i in cubes}
         for face in moves:
             rot = Rotation.from_rotvec(np.pi / 2 * self.get_normal(face))
-            cubes_ids = np.array(self.default_faces[face])
-            cubes_rotated = cubes[cubes_ids]
-            for c in cubes_rotated:
+            cubes_ids = np.array(self.default_faces[face])  # 9 cubes in face
+            cubes_to_rotate = cubes[cubes_ids]
+            for c in cubes_to_rotate:
                 rots_cube[c] = rot * rots_cube[c]
             cubes[cubes_ids] = cubes[cubes_ids[[2, 5, 8, 1, 4, 7, 0, 3, 6]]]
 
         # Apply combinaison of moves
         for cube_id, rot in rots_cube.items():
-            self.cubes[cube_id].rotate(rot.as_rotvec())
-            self.cubes[cube_id].position = rot.apply(self.cubes[cube_id].position)
+            self.cubes[cube_id].rotate(rot)
         # Recompute state
-        self.compute_state()
+        self.compute_faces()
 
 
 if __name__ == "__main__":

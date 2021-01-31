@@ -71,20 +71,18 @@ class Cube:
                 # glVertex3fv(tuple(top_left))
                 # glEnd()
 
-    def draw(self, rot=None):
-        if rot is None:
-            rot = Rotation.identity()
+    def draw(self):
         for face in self.SURFACES.keys():
             surface = self.SURFACES[face]
             color = self.colors[face]
-            corners = [rot.apply(self.verticies[v]) for v in surface]
+            corners = [self.verticies[v] for v in surface]
             self._draw_square(corners, color)
 
         glBegin(GL_LINES)
         glColor3fv(Color.BLACK)
         for edge in self.EDGES:
             for v in edge:
-                vertex = rot.apply(self.verticies[v])
+                vertex = self.verticies[v]
                 glVertex3fv(tuple(vertex))
         glEnd()
 
