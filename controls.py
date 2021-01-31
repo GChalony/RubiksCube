@@ -24,22 +24,17 @@ class NavigationController:
         self.camera_rot = Rotation.identity()
         self.rot_delta = Rotation.from_rotvec([0, self.ROT_DELTA, 0])
 
-    def compute_camera_pos(self):
-        pos = self.camera_rot.apply(self.DEFAULT_CAMERA_POS)
-        return pos
-
     def toggle_cube_rot(self):
         if np.linalg.norm(self.rot_delta.as_rotvec()) < 0.01:
-            print("Enabling")
-            return Rotation.from_rotvec([0, self.ROT_DELTA, 0])
+            self.rot_delta = Rotation.from_rotvec([0, self.ROT_DELTA, 0])
         else:
-            return Rotation.identity()
+            self.rot_delta = Rotation.identity()
 
     def handle_event(self, event):
         # print(event)
         if event.type in [pg.KEYUP, pg.KEYDOWN] and event.key in self.HANDLED_KEYS:
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
-                self.rot_delta = self.toggle_cube_rot()
+                self.toggle_cube_rot()
             # Reset view
             elif event.type == KEYDOWN and event.key == pg.K_ESCAPE:
                 self.camera_rot = Rotation.identity()
@@ -52,25 +47,26 @@ class NavigationController:
                 self.keys_pressed.pop(event.key, None)
 
     def animate(self):
-        # Reset view then recompute camera position
-        glPopMatrix()
-        glPushMatrix()
         n = pg.time.get_ticks()
         for key, time in self.keys_pressed.items():
             rot_speed = self.rot_speed(n - time)
             if key in [pg.K_RIGHT, pg.K_LEFT]:
-                sign = -1 if key == pg.K_RIGHT else 1
+                sign = 1 if key == pg.K_RIGHT else -1
                 rot = Rotation.from_rotvec([0, sign * rot_speed, 0])
-                self.camera_rot = rot * self.camera_rot
+                self.camera_rot = self.camera_rot * rot
             else:
-                sign = -1 if key == pg.K_UP else 1
-                rot = Rotation.from_rotvec(self.camera_rot.apply([sign * rot_speed, 0, 0]))
+                sign = 1 if key == pg.K_UP else -1
+                rot = Rotation.from_rotvec([sign * rot_speed, 0, 0])
                 self.camera_rot = rot * self.camera_rot
-        self.camera_rot = self.rot_delta * self.camera_rot
-        gluLookAt(*self.compute_camera_pos(), 0, 0, 0, 0, 1, 0)
+        self.camera_rot = self.camera_rot * self.rot_delta
+        rotvec = self.camera_rot.as_rotvec()
+        # Reset view then recompute camera position
+        glPopMatrix()
+        glPushMatrix()
+        glRotate(np.degrees(np.linalg.norm(rotvec)), *rotvec)
 
     def rot_speed(self, dt):
-        return dt / 3000
+        return dt / 10000
 
 
 class CubeController:
@@ -131,6 +127,9 @@ if __name__ == '__main__':
 
     # Camera view
     gluPerspective(30, (display[0] / display[1]), 0.1, 50.0)
+    glTranslatef(0, 0, -10)
+    # glRotatef(20, 0, 1, 0)
+    # glRotatef(30, 1, 0, 0)
 
     glEnable(GL_DEPTH_TEST)
     glLineWidth(5.0)
@@ -143,5 +142,4 @@ if __name__ == '__main__':
         cube.draw()
         pg.display.flip()
 
-        # TODO constant frame rate ?
         pg.time.wait(10)
