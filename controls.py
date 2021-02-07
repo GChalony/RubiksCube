@@ -1,4 +1,6 @@
 from collections import namedtuple
+from threading import Thread
+from time import sleep
 
 import numpy as np
 import pygame as pg
@@ -39,7 +41,6 @@ class NavigationController:
             # Reset view
             elif event.type == KEYDOWN and event.key == pg.K_ESCAPE:
                 self.camera_rot = Rotation.identity()
-                print("Reset")
             # Register key down
             elif event.type == pg.KEYDOWN:
                 self.keys_pressed[event.key] = pg.time.get_ticks()
@@ -89,10 +90,8 @@ class NavigationController:
             scale = 100
             v = [dy / scale, dx / scale, 0]
             rot = Rotation.from_rotvec(v)
-            print(v)
             self.camera_rot = rot * self.camera_rot
             self.mouse_pos_on_click = (x, y)
-
 
 
 class CubeController:
@@ -107,21 +106,21 @@ class CubeController:
             reverse = event.mod == pg.KMOD_LSHIFT or event.mod == pg.KMOD_RSHIFT
             # Pause / Play rotation
             if event.key == pg.K_f:
-                cube.move_face("F", reverse=reverse)
+                self.cube.move_face("F", reverse=reverse)
             elif event.key == pg.K_b:
-                cube.move_face("B", reverse=reverse)
+                self.cube.move_face("B", reverse=reverse)
             elif event.key == pg.K_l:
-                cube.move_face("L", reverse=reverse)
+                self.cube.move_face("L", reverse=reverse)
             elif event.key == pg.K_r:
-                cube.move_face("R", reverse=reverse)
+                self.cube.move_face("R", reverse=reverse)
             elif event.key == pg.K_u:
-                cube.move_face("U", reverse=reverse)
+                self.cube.move_face("U", reverse=reverse)
             elif event.key == pg.K_d:
-                cube.move_face("D", reverse=reverse)
+                self.cube.move_face("D", reverse=reverse)
 
     def animate(self):
         # TODO handle cube rot speed
-        cube.animate()
+        self.cube.animate()
         pass
 
 
@@ -142,6 +141,7 @@ def handle_events(controllers):
 
 
 if __name__ == '__main__':
+
     cube = RubiksCube()
     cube.shuffle()
 
