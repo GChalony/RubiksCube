@@ -6,7 +6,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from pygame.locals import *
 
-from controls import NavigationController, CubeController, handle_events
+from events_controllers import NavigationController, CubeController, handle_events
 from rubikscube import RubiksCube
 from ui.dashboard import Dashboard
 
@@ -49,7 +49,7 @@ def run_controls_ui():
 cube = RubiksCube()
 controls = [NavigationController(cube), CubeController(cube)]
 
-dash = Dashboard()
+dash = Dashboard(cube, controls[0])
 
 tCube = Thread(target=run_cube_sim)
 tCube.start()

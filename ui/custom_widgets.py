@@ -24,6 +24,9 @@ class WrappedLabel(Label):
     def on_configure(self, event):
         self._update_text(event.width)
 
+    def get_text(self):
+        return self._txt
+
 
 class SectionTitle(Frame):
     """Title widget to separate controls sections"""
@@ -35,6 +38,7 @@ class SectionTitle(Frame):
         self.h1.pack(side=LEFT, padx=10)
         self.txt.pack(side=LEFT, padx=10)
         self.h2.pack(side=LEFT, fill=X, expand=True, padx=10)
+
 
 
 class ArrowButton(Button):

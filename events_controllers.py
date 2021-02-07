@@ -1,6 +1,4 @@
 from collections import namedtuple
-from threading import Thread
-from time import sleep
 
 import numpy as np
 import pygame as pg
@@ -20,6 +18,8 @@ class NavigationController:
     HANDLED_KEYS = [pg.K_SPACE, pg.K_UP, pg.K_DOWN,
                     pg.K_LEFT, pg.K_RIGHT, pg.K_ESCAPE]
 
+    DIRECTION_FOR_KEY = {pg.K_UP: "UP", pg.K_DOWN: "DOWN", pg.K_LEFT: "LEFT", pg.K_RIGHT: "RIGHT"}
+
     def __init__(self, cube):
         self.keys_pressed = {}
         self.mouse_pos_on_click = None
@@ -33,6 +33,12 @@ class NavigationController:
         else:
             self.rot_delta = Rotation.identity()
 
+    def reset_view(self):
+        self.camera_rot = Rotation.identity()
+
+    def start_move(self, direction):
+        self.keys_pressed[direction] = pg.time.get_ticks()
+
     def handle_event(self, event):
         # print(event)
         if event.type in [pg.KEYUP, pg.KEYDOWN] and event.key in self.HANDLED_KEYS:
@@ -40,20 +46,20 @@ class NavigationController:
                 self.toggle_cube_rot()
             # Reset view
             elif event.type == KEYDOWN and event.key == pg.K_ESCAPE:
-                self.camera_rot = Rotation.identity()
+                self.reset_view()
             # Register key down
             elif event.type == pg.KEYDOWN:
-                self.keys_pressed[event.key] = pg.time.get_ticks()
+                self.start_move(self.DIRECTION_FOR_KEY[event.key])
             # Unregister key down
             elif event.type == pg.KEYUP:
-                self.keys_pressed.pop(event.key, None)
+                dir = self.DIRECTION_FOR_KEY.get(event.key, None)
+                self.keys_pressed.pop(dir, None)
         elif event.type == pg.MOUSEBUTTONDOWN:
             self.mouse_pos_on_click = pg.mouse.get_pos()
         elif event.type == pg.MOUSEBUTTONUP:
             self.mouse_pos_on_click = None
 
     def _update_view(self):
-        # Reset view then recompute camera position
         glPopMatrix()
         glPushMatrix()
         rotvec = self.camera_rot.as_rotvec()
@@ -65,14 +71,14 @@ class NavigationController:
 
     def _animate_keys(self):
         n = pg.time.get_ticks()
-        for key, time in self.keys_pressed.items():
+        for direction, time in self.keys_pressed.items():
             rot_speed = self._rot_speed(n - time)
-            if key in [pg.K_RIGHT, pg.K_LEFT]:
-                sign = 1 if key == pg.K_RIGHT else -1
+            if direction in ["RIGHT", "LEFT"]:
+                sign = 1 if direction == "RIGHT" else -1
                 rot = Rotation.from_rotvec([0, sign * rot_speed, 0])
                 self.camera_rot = rot * self.camera_rot
             else:
-                sign = 1 if key == pg.K_UP else -1
+                sign = 1 if direction == "UP" else -1
                 rot = Rotation.from_rotvec([sign * rot_speed, 0, 0])
                 self.camera_rot = rot * self.camera_rot
         self.camera_rot = self.rot_delta * self.camera_rot
@@ -119,12 +125,11 @@ class CubeController:
                 self.cube.move_face("D", reverse=reverse)
 
     def animate(self):
-        # TODO handle cube rot speed
         self.cube.animate()
         pass
 
 
-def animate_controls(controllers):
+def animate_controllers(controllers):
     for controller in controllers:
         controller.animate()
 
@@ -137,7 +142,7 @@ def handle_events(controllers):
         else:
             for controller in controllers:
                 controller.handle_event(event)
-    animate_controls(controllers)
+    animate_controllers(controllers)
 
 
 if __name__ == '__main__':
@@ -154,8 +159,6 @@ if __name__ == '__main__':
     # Camera view
     gluPerspective(30, (display[0] / display[1]), 0.1, 50.0)
     glTranslatef(0, 0, -10)
-    # glRotatef(20, 0, 1, 0)
-    # glRotatef(30, 1, 0, 0)
 
     glEnable(GL_DEPTH_TEST)
     glLineWidth(5.0)

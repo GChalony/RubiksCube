@@ -1,18 +1,16 @@
 from dataclasses import dataclass
 from functools import cached_property
-from typing import List
 
 import numpy as np
 import pygame
-from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
+from pygame.locals import *
 from scipy.spatial.distance import cdist
-
 from scipy.spatial.transform import Rotation
 
 from cube import Cube
-from utils import Color
+from utils import Color, Queue
 
 
 @dataclass
@@ -48,6 +46,8 @@ def handle_events():
 class RubiksCube:
     offset = 1.1
 
+    # TODO start cube from given state
+
     def __init__(self):
         colors = [
             {"U": Color.WHITE if y == 1 else Color.HIDDEN,
@@ -65,7 +65,7 @@ class RubiksCube:
 
         self.faces = self.default_faces
 
-        self._animation: List[FaceRotationAnimation] = []  # Stores animations to move faces
+        self._animation: Queue = Queue()  # Stores animations to move faces
 
     @cached_property
     def default_positions(self):
@@ -123,9 +123,9 @@ class RubiksCube:
 
     def animate(self, speed_deg=6):
         # Needs to be called for each frame in case there are animations to run
-        if len(self._animation) == 0:
+        if self._animation.empty():
             return
-        anim = self._animation[0]
+        anim = self._animation.peek()
         if anim.current_angle >= anim.target_angle:
             self.finish_animation()
             return
@@ -147,10 +147,11 @@ class RubiksCube:
             c.position = pos
 
         self.compute_faces()
-        self._animation.pop(0)
+        self._animation.pop()
 
     def move_face(self, face, angle=90, reverse=False):
-        self._animation.append(
+        print("Moving face", face, reverse)
+        self._animation.put(
             FaceRotationAnimation(face, pygame.time.get_ticks(), 0, angle, reverse)
         )
 
