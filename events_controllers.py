@@ -140,8 +140,9 @@ def animate_controllers(controllers, dt):
 def handle_events(controllers, close):
     for event in pg.event.get():
         if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_q):
-            pg.quit()
-            close()
+            pg.quit()   # Close pygame window
+            close()     # Close Tkinter window
+            quit()      # Close Thread
         else:
             for controller in controllers:
                 controller.handle_event(event)

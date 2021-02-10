@@ -63,9 +63,16 @@ controls = [NavigationController(cube), CubeController(cube)]
 
 dash = Dashboard(cube, controls[0])
 
-tCube = Thread(target=run_cube_sim, args=(dash.destroy,))
+
+def close_all():
+    dash.quit()
+
+
+tCube = Thread(target=run_cube_sim, args=(close_all,))
 tCube.start()
 
 run_controls_ui()  # Tkinter needs to be called from main thread
 
-finish_signal = True
+finish_signal = True    # If Tkinter windows is closed, run_controls_ui will return,
+                        # the signal will be changed so pygame will exit its main loop.
+tCube.join()
