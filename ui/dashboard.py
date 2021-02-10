@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import font
 
+import numpy as np
+
 from events_controllers import NavigationController
 from rubikscube import RubiksCube
 from ui.custom_widgets import SectionTitle, ArrowButton, MoveButton, WrappedLabel, SolverControls
@@ -102,11 +104,12 @@ class Dashboard(tk.Tk):
     def _add_callbacks(self):
         self.copy_button.bind("<Button>", self.copy_state_to_clipboard)
 
+        angle_move = np.radians(10)
         self.reset.bind("<Button>", lambda ev: self.view_controller.reset_view())
-        self.left.bind("<Button>", lambda ev: self.view_controller.start_move("LEFT"))
-        self.right.bind("<Button>", lambda ev: self.view_controller.start_move("RIGHT"))
-        self.up.bind("<Button>", lambda ev: self.view_controller.start_move("UP"))
-        self.down.bind("<Button>", lambda ev: self.view_controller.start_move("DOWN"))
+        self.left.bind("<Button>", lambda ev: self.view_controller.move_view("LEFT", angle_move))
+        self.right.bind("<Button>", lambda ev: self.view_controller.move_view("RIGHT", angle_move))
+        self.up.bind("<Button>", lambda ev: self.view_controller.move_view("UP", angle_move))
+        self.down.bind("<Button>", lambda ev: self.view_controller.move_view("DOWN", angle_move))
 
         self.move_F.bind("<Button>", lambda ev: self.cube.move_face("F"))
         self.move_B.bind("<Button>", lambda ev: self.cube.move_face("B"))

@@ -65,6 +65,17 @@ class NavigationController:
         rotvec = self.camera_rot.as_rotvec()
         glRotate(np.degrees(np.linalg.norm(rotvec)), *rotvec)
 
+    def move_view(self, direction, angle):
+        # TODO rotate view around axis
+        if direction in ["RIGHT", "LEFT"]:
+            sign = 1 if direction == "RIGHT" else -1
+            rot = Rotation.from_rotvec([0, sign * angle, 0])
+            self.camera_rot = rot * self.camera_rot
+        else:
+            sign = 1 if direction == "UP" else -1
+            rot = Rotation.from_rotvec([sign * angle, 0, 0])
+            self.camera_rot = rot * self.camera_rot
+
     def animate(self, dt):
         self._animate_keys(dt)
         self._animate_mouse(dt)
@@ -72,14 +83,7 @@ class NavigationController:
     def _animate_keys(self, dt):
         for direction, time in self.keys_pressed.items():
             rot_speed = self._rot_speed(pg.time.get_ticks() - time)
-            if direction in ["RIGHT", "LEFT"]:
-                sign = 1 if direction == "RIGHT" else -1
-                rot = Rotation.from_rotvec([0, sign * rot_speed, 0])
-                self.camera_rot = rot * self.camera_rot
-            else:
-                sign = 1 if direction == "UP" else -1
-                rot = Rotation.from_rotvec([sign * rot_speed, 0, 0])
-                self.camera_rot = rot * self.camera_rot
+            self.move_view(direction, rot_speed)
         self.camera_rot = self.rot_delta * self.camera_rot
         self._update_view()
 
