@@ -45,6 +45,7 @@ def handle_events():
 
 class RubiksCube:
     offset = 1.1
+    DEG_PER_SEC = 100
 
     # TODO start cube from given state
 
@@ -121,11 +122,12 @@ class RubiksCube:
         for cube in self.cubes:
             cube.draw()
 
-    def animate(self, speed_deg=6):
+    def animate(self, dt):
+        speed_deg = dt * self.DEG_PER_SEC / 1000
         # Needs to be called for each frame in case there are animations to run
         if self._animation.empty():
             return
-        anim = self._animation.peek()
+        anim = self._animation.peek()  # Get current face animation
         if anim.current_angle >= anim.target_angle:
             self.finish_animation()
             return
@@ -140,6 +142,7 @@ class RubiksCube:
         anim.current_angle += speed_deg
 
     def finish_animation(self):
+        # TODO round angles too
         # Round cubes position
         positions = np.array([c.position for c in self.cubes])
         round_positions = np.round(positions / self.offset) * self.offset
@@ -150,7 +153,6 @@ class RubiksCube:
         self._animation.pop()
 
     def move_face(self, face, angle=90, reverse=False):
-        print("Moving face", face, reverse)
         self._animation.put(
             FaceRotationAnimation(face, pygame.time.get_ticks(), 0, angle, reverse)
         )

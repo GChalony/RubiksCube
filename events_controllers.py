@@ -65,14 +65,13 @@ class NavigationController:
         rotvec = self.camera_rot.as_rotvec()
         glRotate(np.degrees(np.linalg.norm(rotvec)), *rotvec)
 
-    def animate(self):
-        self._animate_keys()
-        self._animate_mouse()
+    def animate(self, dt):
+        self._animate_keys(dt)
+        self._animate_mouse(dt)
 
-    def _animate_keys(self):
-        n = pg.time.get_ticks()
+    def _animate_keys(self, dt):
         for direction, time in self.keys_pressed.items():
-            rot_speed = self._rot_speed(n - time)
+            rot_speed = self._rot_speed(dt)
             if direction in ["RIGHT", "LEFT"]:
                 sign = 1 if direction == "RIGHT" else -1
                 rot = Rotation.from_rotvec([0, sign * rot_speed, 0])
@@ -87,14 +86,14 @@ class NavigationController:
     def _rot_speed(self, dt):
         return dt / 2000
 
-    def _animate_mouse(self):
+    def _animate_mouse(self, dt):
         if self.mouse_pos_on_click is not None:
             prev_x, prev_y = self.mouse_pos_on_click
             x, y = pg.mouse.get_pos()
             dx, dy = x - prev_x, y - prev_y
             # Find vector around which to rotate
-            scale = 100
-            v = [dy / scale, dx / scale, 0]
+            scale = 2
+            v = [dy / dt / scale, dx / dt / scale, 0]
             rot = Rotation.from_rotvec(v)
             self.camera_rot = rot * self.camera_rot
             self.mouse_pos_on_click = (x, y)
@@ -124,14 +123,14 @@ class CubeController:
             elif event.key == pg.K_d:
                 self.cube.move_face("D", reverse=reverse)
 
-    def animate(self):
-        self.cube.animate()
+    def animate(self, dt):
+        self.cube.animate(dt)
         pass
 
 
-def animate_controllers(controllers):
+def animate_controllers(controllers, dt):
     for controller in controllers:
-        controller.animate()
+        controller.animate(dt)
 
 
 def handle_events(controllers):
@@ -142,7 +141,6 @@ def handle_events(controllers):
         else:
             for controller in controllers:
                 controller.handle_event(event)
-    animate_controllers(controllers)
 
 
 if __name__ == '__main__':

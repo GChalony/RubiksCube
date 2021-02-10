@@ -6,7 +6,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from pygame.locals import *
 
-from events_controllers import NavigationController, CubeController, handle_events
+from events_controllers import NavigationController, CubeController, handle_events, animate_controllers
 from rubikscube import RubiksCube
 from ui.dashboard import Dashboard
 
@@ -29,16 +29,21 @@ def setup():
 
 def run_cube_sim():
     global cube
+
+    clock = pg.time.Clock()
     setup()
+    clock.tick()
 
     while True:
         handle_events(controls)
-
+        # Drawing
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         cube.draw()
         pg.display.flip()
 
-        pg.time.wait(10)
+        dt = clock.tick(30)
+        animate_controllers(controls, dt)
+
 
 
 def run_controls_ui():
