@@ -122,12 +122,14 @@ class RubiksCube:
         anim.current_angle += speed_deg
 
     def finish_animation(self):
-        # TODO round angles too
         # Round cubes position
         positions = np.array([c.position for c in self.cubes])
         round_positions = np.round(positions / self.offset) * self.offset
-        for c, pos in zip(self.cubes, round_positions):
+        rotations = np.array([c.rotation.as_euler("xyz") for c in self.cubes])
+        round_rotations = np.round(rotations / np.pi * 2) * np.pi / 2
+        for c, pos, rot in zip(self.cubes, round_positions, round_rotations):
             c.position = pos
+            c.rotation = Rotation.from_euler("xyz", rot)
 
         self.compute_faces()
         self._animation.pop()
@@ -140,7 +142,7 @@ class RubiksCube:
     def shuffle(self):
         # Shuffles only one way (no U')...
         len = 30
-        moves = np.random.choice(list(self.faces.keys()), len)
+        # moves = np.random.choice(list(self.faces.keys()), len)
         moves = ['F', 'R']
         print(moves)
         cubes = np.arange(26)

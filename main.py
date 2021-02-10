@@ -54,6 +54,7 @@ def run_controls_ui():
 
 
 cube = RubiksCube()
+cube.shuffle()
 controls = [NavigationController(cube), CubeController(cube)]
 
 dash = Dashboard(cube, controls[0])
