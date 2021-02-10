@@ -22,31 +22,11 @@ class FaceRotationAnimation:
     reverse: bool
 
 
-def handle_events():
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            quit()
-        if event.type == pygame.KEYDOWN:
-            reverse = event.mod == pygame.KMOD_LSHIFT or event.mod == pygame.KMOD_RSHIFT
-            if event.key == pygame.K_f:
-                cube.move_face("F", reverse=reverse)
-            elif event.key == pygame.K_b:
-                cube.move_face("B", reverse=reverse)
-            elif event.key == pygame.K_l:
-                cube.move_face("L", reverse=reverse)
-            elif event.key == pygame.K_r:
-                cube.move_face("R", reverse=reverse)
-            elif event.key == pygame.K_u:
-                cube.move_face("U", reverse=reverse)
-            elif event.key == pygame.K_d:
-                cube.move_face("D", reverse=reverse)
-
-
 class RubiksCube:
     offset = 1.1
     DEG_PER_SEC = 100
 
+    # TODO compute cube current state
     # TODO start cube from given state
 
     def __init__(self):
@@ -179,34 +159,3 @@ class RubiksCube:
         # Recompute state
         self.compute_faces()
 
-
-if __name__ == "__main__":
-    cube = RubiksCube()
-    cube.shuffle()
-
-    pygame.init()
-    display = (800, 600)
-    pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
-
-    gluPerspective(45, (display[0] / display[1]), 0.1, 50.0)
-
-    glEnable(GL_DEPTH_TEST)
-    # glLineWidth(5.0)
-
-    gluLookAt(0, 3.5, 10, 0, 0, 0, 0, 1, 0)
-    # cube.move_face("F")
-    print(cube)
-    delta_rot = Rotation.from_rotvec([0, 0.01, 0])
-
-    start = pygame.time.get_ticks()
-
-    while True:
-        handle_events()
-        # cube.rotation = delta_rot * cube.rotation
-        glRotatef(0.5, 0, 1, 0)
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-
-        cube.draw()
-        cube.animate()
-        pygame.display.flip()
-        pygame.time.wait(10)

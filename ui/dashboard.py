@@ -13,7 +13,7 @@ class Dashboard(tk.Tk):
         self.cube: RubiksCube = cube
         self.view_controller: NavigationController = view_controller
         self.title("RubiksCube controls")
-        self.geometry("300x700+1300+200")
+        self.geometry("300x700+1200+200")
         self._create_state()
         self._create_view()
         self._create_controls()

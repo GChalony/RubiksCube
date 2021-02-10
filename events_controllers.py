@@ -135,6 +135,7 @@ def animate_controllers(controllers, dt):
 
 def handle_events(controllers):
     for event in pg.event.get():
+        # TODO close both windows
         if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_q):
             pg.quit()
             quit()

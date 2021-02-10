@@ -1,4 +1,5 @@
 # All threading logic is done here
+import os
 from threading import Thread
 
 import pygame as pg
@@ -12,8 +13,10 @@ from ui.dashboard import Dashboard
 
 
 def setup():
+    os.environ['SDL_VIDEO_WINDOW_POS'] = "400,200"  # Ask Window Manager to position window there
+
     pg.init()
-    display = (800, 600)
+    display = (800, 700)
     pg.display.set_mode(display, DOUBLEBUF | OPENGL)
 
     # Camera view
@@ -43,7 +46,6 @@ def run_cube_sim():
 
         dt = clock.tick(30)
         animate_controllers(controls, dt)
-
 
 
 def run_controls_ui():
