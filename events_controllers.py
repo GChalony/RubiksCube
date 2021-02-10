@@ -71,7 +71,7 @@ class NavigationController:
 
     def _animate_keys(self, dt):
         for direction, time in self.keys_pressed.items():
-            rot_speed = self._rot_speed(dt)
+            rot_speed = self._rot_speed(pg.time.get_ticks() - time)
             if direction in ["RIGHT", "LEFT"]:
                 sign = 1 if direction == "RIGHT" else -1
                 rot = Rotation.from_rotvec([0, sign * rot_speed, 0])
