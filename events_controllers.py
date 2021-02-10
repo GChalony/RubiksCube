@@ -66,7 +66,7 @@ class NavigationController:
         glRotate(np.degrees(np.linalg.norm(rotvec)), *rotvec)
 
     def move_view(self, direction, angle):
-        # TODO rotate view around axis
+        # rotate view around axis
         if direction in ["RIGHT", "LEFT"]:
             sign = 1 if direction == "RIGHT" else -1
             rot = Rotation.from_rotvec([0, sign * angle, 0])

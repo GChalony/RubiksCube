@@ -76,3 +76,54 @@ class SolverControls(Frame):
         todo.pack()
         # TODO add name / buttons / loader / moves count / suggested moves
 
+
+class ToggleButton(Button):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._toggled = False
+        self.bind("<Button>", self.toggle)
+
+    def toggle(self, event):
+        print("Toggling", self._toggled, event)
+        if self._toggled:
+            self.config(relief="raised", bg="white", activebackground="white")
+        else:
+            self.config(relief="sunken", bg="gray", activebackground="gray")
+        self._toggled = not self._toggled
+
+
+class ToggleButton2(Frame):
+    def __init__(self, master, text):
+        super().__init__(master)
+        self._width = 25
+        self._height = 20
+        self._text = Label(self, text=text)
+        self._canvas = Canvas(self, width=self._width, height=self._height)
+        self._text.pack()
+        self._canvas.pack()
+        self._toggled = False
+        self.bind("<Button>", self.toggle)
+        self._canvas.bind("<Button>", self.callback)
+        self._callbacks = [self.toggle]
+        self._draw()
+
+    def _draw(self):
+        self._canvas.delete("all")
+        w, h = self._width, self._height
+        r = 8
+        x = w - r - 1 if self._toggled else r + 1
+        y = h // 2
+        color = "black" if self._toggled else "grey"
+        self._canvas.create_line(3, h//2, w-3, h//2, fill="gray", width=5, capstyle='round')
+        self._canvas.create_oval(x - r, y - r, x + r, y + r, fill=color, width=0)
+
+    def toggle(self, event=None):
+        self._toggled = not self._toggled
+        self._draw()
+
+    def add_callback(self, function):
+        self._callbacks.append(function)
+
+    def callback(self, event=None):
+        for c in self._callbacks:
+            c(event)

@@ -5,7 +5,8 @@ import numpy as np
 
 from events_controllers import NavigationController
 from rubikscube import RubiksCube
-from ui.custom_widgets import SectionTitle, ArrowButton, MoveButton, WrappedLabel, SolverControls
+from ui.custom_widgets import SectionTitle, ArrowButton, MoveButton, WrappedLabel, SolverControls, ToggleButton, \
+    ToggleButton2
 
 
 class Dashboard(tk.Tk):
@@ -46,11 +47,13 @@ class Dashboard(tk.Tk):
         self.up = ArrowButton(frame, type="up")
         self.down = ArrowButton(frame, type="down")
         self.right = ArrowButton(frame, type="right")
+        self.rot_toggle = ToggleButton2(frame, text="rot")
         self.reset.pack(side=tk.LEFT)
         self.left.pack(side=tk.LEFT)
         self.up.pack(side=tk.LEFT)
         self.down.pack(side=tk.LEFT)
         self.right.pack(side=tk.LEFT)
+        self.rot_toggle.pack(side=tk.LEFT)
         frame.pack()
 
     def _create_controls(self):
@@ -110,6 +113,7 @@ class Dashboard(tk.Tk):
         self.right.bind("<Button>", lambda ev: self.view_controller.move_view("RIGHT", angle_move))
         self.up.bind("<Button>", lambda ev: self.view_controller.move_view("UP", angle_move))
         self.down.bind("<Button>", lambda ev: self.view_controller.move_view("DOWN", angle_move))
+        self.rot_toggle.add_callback(lambda ev: self.view_controller.toggle_cube_rot())
 
         self.move_F.bind("<Button>", lambda ev: self.cube.move_face("F"))
         self.move_B.bind("<Button>", lambda ev: self.cube.move_face("B"))
