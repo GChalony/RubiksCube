@@ -30,15 +30,15 @@ def setup():
     glPushMatrix()
 
 
-def run_cube_sim():
-    global cube
+def run_cube_sim(close_all):
+    global finish_signal, cube, controls
 
     clock = pg.time.Clock()
     setup()
     clock.tick()
 
-    while True:
-        handle_events(controls)
+    while not finish_signal:
+        handle_events(controls, close_all)
         # Drawing
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         cube.draw()
@@ -47,11 +47,15 @@ def run_cube_sim():
         dt = clock.tick(30)
         animate_controllers(controls, dt)
 
+    pg.quit()
+
 
 def run_controls_ui():
     global dash
     dash.mainloop()
 
+
+finish_signal = False
 
 cube = RubiksCube()
 cube.shuffle()
@@ -59,8 +63,9 @@ controls = [NavigationController(cube), CubeController(cube)]
 
 dash = Dashboard(cube, controls[0])
 
-tCube = Thread(target=run_cube_sim)
+tCube = Thread(target=run_cube_sim, args=(dash.destroy,))
 tCube.start()
 
 run_controls_ui()  # Tkinter needs to be called from main thread
 
+finish_signal = True

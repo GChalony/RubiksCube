@@ -137,41 +137,12 @@ def animate_controllers(controllers, dt):
         controller.animate(dt)
 
 
-def handle_events(controllers):
+def handle_events(controllers, close):
     for event in pg.event.get():
-        # TODO close both windows
         if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_q):
             pg.quit()
-            quit()
+            close()
         else:
             for controller in controllers:
                 controller.handle_event(event)
 
-
-if __name__ == '__main__':
-
-    cube = RubiksCube()
-    cube.shuffle()
-
-    controls = [NavigationController(cube), CubeController(cube)]
-
-    pg.init()
-    display = (800, 600)
-    pg.display.set_mode(display, DOUBLEBUF | OPENGL)
-
-    # Camera view
-    gluPerspective(30, (display[0] / display[1]), 0.1, 50.0)
-    glTranslatef(0, 0, -10)
-
-    glEnable(GL_DEPTH_TEST)
-    glLineWidth(5.0)
-    glPushMatrix()
-
-    while True:
-        handle_events(controls)
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        cube.draw()
-        pg.display.flip()
-
-        pg.time.wait(10)

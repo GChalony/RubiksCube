@@ -60,7 +60,6 @@ class MoveButton(Button):
         self.image = PhotoImage(file=image_path)
 
         super().__init__(master, image=self.image, bd=0, **kwargs)
-        # TODO constrain dimensions / default font size
 
     def pack(self, **kwargs):
         kwargs = {"padx": 4, "pady": 4, **kwargs}
