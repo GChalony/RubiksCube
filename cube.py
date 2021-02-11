@@ -1,8 +1,5 @@
 import numpy as np
-import pygame
-from pygame.locals import *
 from OpenGL.GL import *
-from OpenGL.GLU import *
 from pygame.locals import Color
 from scipy.spatial.transform.rotation import Rotation
 
@@ -60,16 +57,6 @@ class Cube:
                 glVertex3fv(tuple(bottom_left))
                 glEnd()
                 glColor3fv(Color.WHITE)
-                # glBegin(GL_LINES)
-                # glVertex3fv(tuple(top_left))
-                # glVertex3fv(tuple(top_right))
-                # glVertex3fv(tuple(top_right))
-                # glVertex3fv(tuple(bottom_right))
-                # glVertex3fv(tuple(bottom_right))
-                # glVertex3fv(tuple(bottom_left))
-                # glVertex3fv(tuple(bottom_left))
-                # glVertex3fv(tuple(top_left))
-                # glEnd()
 
     def draw(self):
         for face in self.SURFACES.keys():
@@ -86,29 +73,3 @@ class Cube:
                 glVertex3fv(tuple(vertex))
         glEnd()
 
-
-if __name__=="__main__":
-    cube = Cube()
-
-    pygame.init()
-    display = (800, 600)
-    pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
-
-    gluPerspective(45, (display[0] / display[1]), 0.1, 50.0)
-    glEnable(GL_DEPTH_TEST)
-
-    glTranslatef(0.1, -0.2, -4)
-    glRotatef(20, 1, 0, 0)
-
-    start = pygame.time.get_ticks()
-
-    while True:
-        for event in pygame.event.get():
-            if event.type==pygame.QUIT:
-                pygame.quit()
-                quit()
-        glRotatef(0.1, 0, 1, 0)
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        cube.draw()
-        pygame.display.flip()
-        pygame.time.wait(10)

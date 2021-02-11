@@ -3,7 +3,6 @@ from functools import cached_property
 
 import numpy as np
 import pygame
-from OpenGL.GL import *
 from OpenGL.GLU import *
 from pygame.locals import *
 from scipy.spatial.distance import cdist
@@ -15,6 +14,7 @@ from utils import Color, Queue
 
 @dataclass
 class FaceRotationAnimation:
+    DEG_PER_SEC = 100
     face: str
     start: int
     current_angle: float
@@ -24,7 +24,6 @@ class FaceRotationAnimation:
 
 class RubiksCube:
     offset = 1.1
-    DEG_PER_SEC = 100
 
     # TODO compute cube current state
     # TODO start cube from given state
@@ -74,7 +73,7 @@ class RubiksCube:
         return faces
 
     def compute_faces(self):
-        # Assumes the cube is never moved / rotated / scaled
+        # /!\ Assumes the cube is never moved / rotated / scaled
         # Find permutation from start
         positions = np.array([c.position for c in self.cubes])
         _, permutation = np.where(cdist(positions, self.default_positions).T < self.offset / 10)
@@ -103,11 +102,11 @@ class RubiksCube:
             cube.draw()
 
     def animate(self, dt):
-        speed_deg = dt * self.DEG_PER_SEC / 1000
         # Needs to be called for each frame in case there are animations to run
         if self._animation.empty():
             return
         anim = self._animation.peek()  # Get current face animation
+        speed_deg = dt * anim.DEG_PER_SEC / 1000
         if anim.current_angle >= anim.target_angle:
             self.finish_animation()
             return

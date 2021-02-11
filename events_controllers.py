@@ -1,15 +1,8 @@
-from collections import namedtuple
-
 import numpy as np
 import pygame as pg
 from OpenGL.GL import *
-from OpenGL.GLU import *
 from pygame.locals import *
 from scipy.spatial.transform.rotation import Rotation
-
-from rubikscube import RubiksCube
-
-EulerAngles = namedtuple("EulerAngle", ["alpha", "beta"])
 
 
 class NavigationController:
@@ -23,7 +16,6 @@ class NavigationController:
     def __init__(self, cube):
         self.keys_pressed = {}
         self.mouse_pos_on_click = None
-        self.cube = cube
         self.camera_rot = Rotation.identity()
         self.rot_delta = Rotation.from_rotvec([0, self.ROT_DELTA, 0])
 
@@ -79,13 +71,13 @@ class NavigationController:
     def animate(self, dt):
         self._animate_keys(dt)
         self._animate_mouse(dt)
+        self._update_view()
 
     def _animate_keys(self, dt):
         for direction, time in self.keys_pressed.items():
             rot_speed = self._rot_speed(pg.time.get_ticks() - time)
             self.move_view(direction, rot_speed)
         self.camera_rot = self.rot_delta * self.camera_rot
-        self._update_view()
 
     def _rot_speed(self, dt):
         return dt / 2000
@@ -104,11 +96,8 @@ class NavigationController:
 
 
 class CubeController:
-    DEFAULT_CUBE_ROT_SPEED = 0.5
-
     def __init__(self, cube):
         self.cube = cube
-        self.cube_rot_speed = self.DEFAULT_CUBE_ROT_SPEED
 
     def handle_event(self, event):
         if event.type == pg.KEYDOWN:
