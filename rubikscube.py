@@ -74,9 +74,9 @@ class RubiksCube:
         if face in ["F", "R", "B", "L"]:
             return y
         elif face == "U":
-            return z
-        elif face == "D":
             return -z
+        elif face == "D":
+            return z
         else:
             raise ArgumentError(f"Wrong face value: {face}")
 
@@ -84,17 +84,17 @@ class RubiksCube:
     def get_face_for_normal(normal):
         [x, y, z] = normal
         if x > 0.9:
-            return "L"
-        elif x < -0.9:
             return "R"
+        elif x < -0.9:
+            return "L"
         elif y > 0.9:
             return "U"
         elif y < -0.9:
             return "D"
         elif z > 0.9:
-            return "B"
-        elif z < -0.9:
             return "F"
+        elif z < -0.9:
+            return "B"
         else:
             raise ValueError(f"No face for normal {normal}")
 
@@ -166,7 +166,7 @@ class RubiksCube:
 
 if __name__ == '__main__':
     cube = RubiksCube()
-    cube.shuffle(20)
+    cube.shuffle(15)
     state = cube.compute_state_string()
     print("State", state)
     solution = kociemba.solve(state)
