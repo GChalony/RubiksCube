@@ -51,15 +51,16 @@ class RubiksCube:
 
     @staticmethod
     def get_normal(face):
+        # See https://learnopengl.com/Getting-started/Coordinate-Systems for convention
         x, y, z = np.array([1, 0, 0]), np.array([0, 1, 0]), np.array([0, 0, 1])
         if face == "F":
-            return -z
-        elif face == "B":
             return z
+        elif face == "B":
+            return -z
         elif face == "L":
-            return x
-        elif face == "R":
             return -x
+        elif face == "R":
+            return x
         elif face == "U":
             return y
         elif face == "D":
