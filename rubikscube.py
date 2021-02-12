@@ -12,7 +12,7 @@ color_for_face = {"U": Color.WHITE, "D": Color.YELLOW,
           "F": Color.ORANGE, "B": Color.RED}
 
 
-class RubiksCubeState:
+class RubiksCube:
     """This class is meant to represent a rubikscube state,
     switching between different representations and access some primitives.
     The different representations are:
@@ -140,6 +140,10 @@ class RubiksCubeState:
         for move in moves:
             self.move(move)
 
+    def is_solved(self):
+        state = self.compute_state_string()
+        return state == "UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB"
+
     def load_state(self, state_str):
         # Check valid
         try:
@@ -160,8 +164,8 @@ class RubiksCubeState:
 
 
 if __name__ == '__main__':
-    cube = RubiksCubeState()
-    cube.shuffle(40)
+    cube = RubiksCube()
+    cube.shuffle(20)
     state = cube.compute_state_string()
     print("State", state)
     solution = kociemba.solve(state)
@@ -169,3 +173,4 @@ if __name__ == '__main__':
     for move in solution.split(" "):
         cube.move(move)
     print(cube.compute_state_string())
+    print("Solved!" if cube.is_solved() else "Not solved...")

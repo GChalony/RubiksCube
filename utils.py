@@ -36,3 +36,4 @@ class Queue:
     def empty(self):
         with self._lock:
             return len(self._list) == 0
+

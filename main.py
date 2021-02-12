@@ -8,7 +8,7 @@ from OpenGL.GLU import *
 from pygame.locals import *
 
 from events_controllers import NavigationController, CubeController, handle_events, animate_controllers
-from rubikscube import RubiksCube
+from rubikscube_drawer import RubiksCubeDrawer
 from ui.dashboard import Dashboard
 
 
@@ -57,8 +57,7 @@ def run_controls_ui():
 
 finish_signal = False
 
-cube = RubiksCube()
-cube.shuffle()
+cube = RubiksCubeDrawer()
 controls = [NavigationController(cube), CubeController(cube)]
 
 dash = Dashboard(cube, controls[0])

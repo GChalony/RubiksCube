@@ -38,38 +38,4 @@ class Cube:
         self.rotation = rot * self.rotation
         self.position = rot.apply(self.position)
 
-    def _draw_square(self, corners, color):
-        """Draw a square using the tesselation factor"""
-        normal = np.cross(corners[3] - corners[0], corners[1] - corners[0])
-        normal = normal / np.linalg.norm(normal)
-        glNormal3fv(tuple(normal))
-        for i in np.arange(0, 1, 1/self.tesselation):
-            for j in np.arange(0, 1, 1/self.tesselation):
-                top_left = corners[0] + i * (corners[1] - corners[0]) + j * (corners[3] - corners[0])
-                top_right = top_left + (corners[1] - corners[0]) / self.tesselation
-                bottom_left = top_left + (corners[3] - corners[0]) / self.tesselation
-                bottom_right = top_left + (corners[2] - corners[0]) / self.tesselation
-                glColor3fv(color)
-                glBegin(GL_QUADS)
-                glVertex3fv(tuple(top_left))
-                glVertex3fv(tuple(top_right))
-                glVertex3fv(tuple(bottom_right))
-                glVertex3fv(tuple(bottom_left))
-                glEnd()
-                glColor3fv(Color.WHITE)
-
-    def draw(self):
-        for face in self.SURFACES.keys():
-            surface = self.SURFACES[face]
-            color = self.colors[face]
-            corners = [self.verticies[v] for v in surface]
-            self._draw_square(corners, color)
-
-        glBegin(GL_LINES)
-        glColor3fv(Color.BLACK)
-        for edge in self.EDGES:
-            for v in edge:
-                vertex = self.verticies[v]
-                glVertex3fv(tuple(vertex))
-        glEnd()
 

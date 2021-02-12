@@ -4,7 +4,7 @@ from tkinter import font
 import numpy as np
 
 from events_controllers import NavigationController
-from rubikscube import RubiksCube
+from rubikscube_drawer import RubiksCubeDrawer
 from ui.custom_widgets import SectionTitle, ArrowButton, MoveButton, WrappedLabel, SolverControls, ToggleButton, \
     ToggleButton2
 
@@ -13,7 +13,7 @@ class Dashboard(tk.Tk):
     # TODO add tooltips
     def __init__(self, cube, view_controller):
         super().__init__()
-        self.cube: RubiksCube = cube
+        self.cube: RubiksCubeDrawer = cube
         self.view_controller: NavigationController = view_controller
         self.title("RubiksCube controls")
         self.geometry("300x700+1200+200")
