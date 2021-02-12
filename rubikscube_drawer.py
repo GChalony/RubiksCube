@@ -65,12 +65,12 @@ class RubiksCubeDrawer:
             return
         anim = self._animation.peek()  # Get current face animation
         speed_deg = dt * anim.DEG_PER_SEC / 1000
-        if anim.current_angle >= anim.target_angle:
+        if anim.current_angle >= anim.target_angle - speed_deg:
             self.finish_animation()
             return
 
         speed_rad = np.radians(speed_deg)
-        delta = speed_rad if not anim.reverse else -speed_rad
+        delta = -speed_rad if not anim.reverse else speed_rad
         rot_vec = delta * self.state.get_normal(anim.face)
         rot = Rotation.from_rotvec(rot_vec)
         for cube in anim.cubes:
@@ -78,7 +78,6 @@ class RubiksCubeDrawer:
         anim.current_angle += speed_deg
 
     def finish_animation(self):
-        print("Finished animation!")
         # Round cubes position
         positions = np.array([c.position for c in self.state.cubes])
         round_positions = np.round(positions / self.state.offset) * self.state.offset
