@@ -7,6 +7,7 @@ from pygame.locals import *
 from scipy.spatial.transform import Rotation
 
 from rubikscube import RubiksCube
+from ui.events_hub import Event, EventsHub
 from utils import Color, Queue
 
 
@@ -14,17 +15,19 @@ from utils import Color, Queue
 class FaceRotationAnimation:
     DEG_PER_SEC = 100
     face: str
-    cubes: list
     start: int
     current_angle: float
     target_angle: float
     reverse: bool
+    cubes: list = None
 
 
 class RubiksCubeDrawer:
-    def __init__(self):
+    def __init__(self, event_hub: EventsHub):
         self.state = RubiksCube()
         self._animation: Queue = Queue()  # Stores animations to move faces
+        self.event_hub = event_hub
+        self._add_listeners()
 
     @staticmethod
     def _draw_square(corners, color):
@@ -64,6 +67,9 @@ class RubiksCubeDrawer:
         if self._animation.empty():
             return
         anim = self._animation.peek()  # Get current face animation
+        if anim.cubes is None:  # First frame
+            anim.cubes = self.state.get_cubes_on_face(anim.face)
+
         speed_deg = dt * anim.DEG_PER_SEC / 1000
         if anim.current_angle >= anim.target_angle - speed_deg:
             self.finish_animation()
@@ -88,10 +94,17 @@ class RubiksCubeDrawer:
             c.rotation = Rotation.from_euler("xyz", rot)
 
         self._animation.pop()
+        # TODO update state label
+        self.event_hub.raise_event(Event(origin=Event.APPLICATION, type=Event.ANIMATIONFINISHED))
 
     def move_face(self, face, angle=90, reverse=False):
         self._animation.put(
-            FaceRotationAnimation(face=face, cubes=self.state.get_cubes_on_face(face),
-                                  start=pygame.time.get_ticks(), current_angle=0,
-                                  target_angle=angle, reverse=reverse)
+            FaceRotationAnimation(face=face, start=pygame.time.get_ticks(),
+                                  current_angle=0, target_angle=angle, reverse=reverse)
         )
+
+    def _add_listeners(self):
+        self.event_hub.add_callback(Event.CUBE_MOVE_FACE,
+                                    lambda event: self.move_face(event.face, 90, event.reverse))
+        self.event_hub.add_callback(Event.NEWFRAME,
+                                    lambda event: self.animate(event.dt))

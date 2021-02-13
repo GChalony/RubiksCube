@@ -1,53 +1,29 @@
 # All threading logic is done here
-import os
 from threading import Thread
 
 import pygame as pg
-from OpenGL.GL import *
-from OpenGL.GLU import *
-from pygame.locals import *
 
-from events_controllers import NavigationController, CubeController, handle_events, animate_controllers
+from camera import Camera
+from opengl_app import OpenGLApp
 from rubikscube_drawer import RubiksCubeDrawer
 from ui.dashboard import Dashboard
+from ui.events_hub import EventsHub, Event
 
 
-def setup():
-    os.environ['SDL_VIDEO_WINDOW_POS'] = "400,200"  # Ask Window Manager to position window there
+def run_cube_sim():
+    global cube, event_hub, app
 
-    pg.init()
-    display = (800, 700)
-    pg.display.set_mode(display, DOUBLEBUF | OPENGL)
-
-    # Camera view
-    gluPerspective(30, (display[0] / display[1]), 0.1, 50.0)
-    glTranslatef(0, 0, -10)
-    # glRotatef(20, 0, 1, 0)
-    # glRotatef(30, 1, 0, 0)
-
-    glEnable(GL_DEPTH_TEST)
-    glLineWidth(5.0)
-    glPushMatrix()
-
-
-def run_cube_sim(close_all):
-    global finish_signal, cube, controls
+    app.setup()
 
     clock = pg.time.Clock()
-    setup()
     clock.tick()
 
-    while not finish_signal:
-        handle_events(controls, close_all)
-        # Drawing
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        cube.draw()
-        pg.display.flip()
+    while True:
+        app.draw_frame(cube)
 
         dt = clock.tick(30)
-        animate_controllers(controls, dt)
-
-    pg.quit()
+        event_hub.raise_event(Event(origin=Event.APPLICATION, type=Event.NEWFRAME, dt=dt))
+        event_hub.handle_events()
 
 
 def run_controls_ui():
@@ -55,23 +31,16 @@ def run_controls_ui():
     dash.mainloop()
 
 
-finish_signal = False
+event_hub = EventsHub()
+cube = RubiksCubeDrawer(event_hub)
+camera = Camera(event_hub)
 
-cube = RubiksCubeDrawer()
-controls = [NavigationController(cube), CubeController(cube)]
-
-dash = Dashboard(cube, controls[0])
-
-
-def close_all():
-    dash.quit()
+app = OpenGLApp(event_hub)
+dash = Dashboard(event_hub)
 
 
-tCube = Thread(target=run_cube_sim, args=(close_all,))
+tCube = Thread(target=run_cube_sim)
 tCube.start()
 
 run_controls_ui()  # Tkinter needs to be called from main thread
-
-finish_signal = True    # If Tkinter windows is closed, run_controls_ui will return,
-                        # the signal will be changed so pygame will exit its main loop.
 tCube.join()
