@@ -121,6 +121,7 @@ class ToggleButton2(Frame):
         self._draw()
 
     def add_callback(self, function):
+        # TODO avoid that
         self._callbacks.append(function)
 
     def callback(self, event=None):

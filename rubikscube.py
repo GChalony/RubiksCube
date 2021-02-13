@@ -6,11 +6,6 @@ from scipy.spatial.transform.rotation import Rotation
 from cube import Cube, ArgumentError
 from utils import Color
 
-# TODO separate cubes face colors and actual colors to drawing part
-color_for_face = {"U": Color.WHITE, "D": Color.YELLOW,
-          "L": Color.BLUE, "R": Color.GREEN,
-          "F": Color.ORANGE, "B": Color.RED}
-
 
 class RubiksCube:
     """This class is meant to represent a rubikscube state,
