@@ -97,13 +97,13 @@ class Dashboard(tk.Tk):
         kocima = SolverControls(self, "Kocima Solver")
         kocima.pack()
 
-    def copy_state_to_clipboard(self, ev):
+    def copy_state_to_clipboard(self, event=None):
         state = self.state.get_text()
         self.clipboard_clear()
         self.clipboard_append(state)
-        print("Copied!")
 
     def on_close(self):
+        # Override close protocol to send close signal
         self.event_hub.raise_event(Event(origin=Event.TKINTER, type=Event.QUIT))
 
     def change_state_label(self, state_str):
@@ -175,4 +175,7 @@ class Dashboard(tk.Tk):
                               Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="R", reverse=True)))
 
     def _add_listeners(self):
-        self.event_hub.add_callback(Event.QUIT, lambda ev: self.destroy())  # TODO fix that
+        self.event_hub.add_callback(Event.QUIT, lambda ev: self.quit())
+        self.event_hub.add_callback(Event.ANIMATIONFINISHED,
+                                    lambda ev: self.change_state_label(ev.state_str))
+        self.event_hub.add_callback(Event.CAMERA_TOGGLE_ROT, self.rot_toggle.toggle)
