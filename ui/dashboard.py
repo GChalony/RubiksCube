@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import font
 
+import Pmw
 import numpy as np
 
 from rubikscube.rubikscube import RubiksCube
@@ -9,9 +10,11 @@ from ui.events_hub import EventsHub, Event
 
 
 class Dashboard(tk.Tk):
-    # TODO add tooltips
     def __init__(self, event_hub: EventsHub):
         super().__init__()
+        self.state_tooltip = Pmw.Balloon(self)
+        self.state_tooltip.configure(label_font=("Courier", 8))
+        self.tooltip = Pmw.Balloon(self)
         self.event_hub = event_hub
         self.title("RubiksCube controls")
         self.geometry("300x700+1200+200")
@@ -28,9 +31,11 @@ class Dashboard(tk.Tk):
         self.state_label.pack(fill=tk.X, ipady=5)
         sf = tk.Frame(self)
         self.state = WrappedLabel(sf, text=RubiksCube.SOLVED_STR, justify=tk.LEFT)
+        self.state_tooltip.bind(self.state, RubiksCube.state_str_to_state_description(RubiksCube.SOLVED_STR))
         copy_logo = tk.PhotoImage(file="images/copy.png")
         self.copy_button = tk.Button(sf, image=copy_logo, bd=0)
         self.copy_button.image = copy_logo
+        self.tooltip.bind(self.copy_button, "Copy to clipboard")
         self.state.pack(side=tk.LEFT, fill=tk.X, expand=True)
         self.copy_button.pack(side=tk.LEFT)
         sf.pack(fill=tk.X)
@@ -47,6 +52,12 @@ class Dashboard(tk.Tk):
         self.down = ArrowButton(frame, type="down")
         self.right = ArrowButton(frame, type="right")
         self.rot_toggle = ToggleButton2(frame, text="rot")
+        self.tooltip.bind(self.reset, "Reset view (Esc)")
+        self.tooltip.bind(self.left, "Rotate left (Left arrow)")
+        self.tooltip.bind(self.up, "Rotate up (Up arrow)")
+        self.tooltip.bind(self.down, "Rotate down (Down arrow)")
+        self.tooltip.bind(self.right, "Rotate right (Right arrow)")
+        self.tooltip.bind(self.rot_toggle, "Toggle cube rotation (Space)")
         self.reset.pack(side=tk.LEFT)
         self.left.pack(side=tk.LEFT)
         self.up.pack(side=tk.LEFT)
@@ -66,6 +77,12 @@ class Dashboard(tk.Tk):
         self.move_L = MoveButton(mf, face="L")
         self.move_U = MoveButton(mf, face="U")
         self.move_D = MoveButton(mf, face="D")
+        self.tooltip.bind(self.move_F, "Move Front face \nclockwise (F)")
+        self.tooltip.bind(self.move_B, "Move Back face \nclockwise (B)")
+        self.tooltip.bind(self.move_R, "Move Right face \nclockwise (R)")
+        self.tooltip.bind(self.move_L, "Move Left face \nclockwise (L)")
+        self.tooltip.bind(self.move_U, "Move Up face \nclockwise (U)")
+        self.tooltip.bind(self.move_D, "Move Down face \nclockwise (D)")
         self.move_F.pack(side=tk.LEFT)
         self.move_B.pack(side=tk.LEFT)
         self.move_R.pack(side=tk.LEFT)
@@ -80,6 +97,12 @@ class Dashboard(tk.Tk):
         self.move_Lr = MoveButton(mf, face="L", reverse=True)
         self.move_Ur = MoveButton(mf, face="U", reverse=True)
         self.move_Dr = MoveButton(mf, face="D", reverse=True)
+        self.tooltip.bind(self.move_Fr, "Move Front face \ncounterclockwise (Maj + F)")
+        self.tooltip.bind(self.move_Br, "Move Back face \ncounterclockwise (Maj + B)")
+        self.tooltip.bind(self.move_Rr, "Move Right face \ncounterclockwise (Maj + R)")
+        self.tooltip.bind(self.move_Lr, "Move Left face \ncounterclockwise (Maj + L)")
+        self.tooltip.bind(self.move_Ur, "Move Up face \ncounterclockwise (Maj + U)")
+        self.tooltip.bind(self.move_Dr, "Move Down face \ncounterclockwise (Maj + D)")
         self.move_Fr.pack(side=tk.LEFT)
         self.move_Br.pack(side=tk.LEFT)
         self.move_Rr.pack(side=tk.LEFT)
