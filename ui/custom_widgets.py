@@ -6,9 +6,10 @@ class WrappedLabel(Label):
     def __init__(self, master, text, **kwargs):
         self._txt = text
         super().__init__(master, **kwargs)
-        self.bind('<Configure>', self.on_configure)
+        self.bind('<Configure>', self._update_text)
 
-    def _update_text(self, max_width):
+    def _update_text(self, event=None):
+        max_width = self.master.winfo_width() - 44  # Hardcoded button width
         font = nametofont(self.cget("font"))
         text = self._txt
 
@@ -21,11 +22,12 @@ class WrappedLabel(Label):
                 actual_width = font.measure(text + "...")
             self.configure(text=text + "...")
 
-    def on_configure(self, event):
-        self._update_text(event.width)
-
     def get_text(self):
         return self._txt
+
+    def set_text(self, txt):
+        self._txt = txt
+        self.config(text=txt)
 
 
 class SectionTitle(Frame):
@@ -38,7 +40,6 @@ class SectionTitle(Frame):
         self.h1.pack(side=LEFT, padx=10)
         self.txt.pack(side=LEFT, padx=10)
         self.h2.pack(side=LEFT, fill=X, expand=True, padx=10)
-
 
 
 class ArrowButton(Button):
