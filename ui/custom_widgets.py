@@ -77,34 +77,18 @@ class SolverControls(Frame):
         # TODO add name / buttons / loader / moves count / suggested moves
 
 
-class ToggleButton(Button):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._toggled = False
-        self.bind("<Button>", self.toggle)
-
-    def toggle(self, event):
-        print("Toggling", self._toggled, event)
-        if self._toggled:
-            self.config(relief="raised", bg="white", activebackground="white")
-        else:
-            self.config(relief="sunken", bg="gray", activebackground="gray")
-        self._toggled = not self._toggled
-
-
 class ToggleButton2(Frame):
     def __init__(self, master, text):
-        super().__init__(master)
+        super().__init__(master, background="red", width=10)
         self._width = 25
         self._height = 20
         self._text = Label(self, text=text)
         self._canvas = Canvas(self, width=self._width, height=self._height)
-        self._text.pack()
+        # self._text.pack()
         self._canvas.pack()
         self._toggled = False
-        self.bind("<Button>", self.toggle)
-        self._canvas.bind("<Button>", self.callback)
-        self._callbacks = [self.toggle]
+        self.bind("<Button>", lambda ev: print("Clicked!"))
+        self._callbacks = []
         self._draw()
 
     def _draw(self):
@@ -121,10 +105,21 @@ class ToggleButton2(Frame):
         self._toggled = not self._toggled
         self._draw()
 
-    def add_callback(self, function):
-        # TODO avoid that
-        self._callbacks.append(function)
+    def bind(self, sequence=None, func=None, add=None):
+        # Monkey patching to attach button bindings to canvas and not parent frame
+        if "<Button" in sequence:
+            self._canvas.bind(sequence, func, add)
+        else:
+            super().bind(sequence, func, add)
 
-    def callback(self, event=None):
-        for c in self._callbacks:
-            c(event)
+
+if __name__ == '__main__':
+    tk = Tk()
+    frame = Frame(tk, background="red", width=500, height=200)
+    frame.bind("<Button>", lambda ev: print("Clicked!"))
+    frame.pack()
+    button = Button(frame, background="blue")
+    button.bindtags(("mytag",) + button.bindtags())
+    button.bind_class("mytag", "<Button>", lambda ev:print("Hello"))
+    button.pack()
+    tk.mainloop()

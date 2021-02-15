@@ -27,7 +27,7 @@ class Dashboard(tk.Tk):
         self.state_label = SectionTitle(self, text='State')
         self.state_label.pack(fill=tk.X, ipady=5)
         sf = tk.Frame(self)
-        self.state = WrappedLabel(sf, text="DRLUUBFDRLUUBFDRLUUBFDRLUUBF", justify=tk.LEFT, anchor=tk.W)
+        self.state = WrappedLabel(sf, text=RubiksCube.SOLVED_STR, justify=tk.LEFT)
         copy_logo = tk.PhotoImage(file="images/copy.png")
         self.copy_button = tk.Button(sf, image=copy_logo, bd=0)
         self.copy_button.image = copy_logo
@@ -105,9 +105,14 @@ class Dashboard(tk.Tk):
 
     def on_close(self):
         self.event_hub.raise_event(Event(origin=Event.TKINTER, type=Event.QUIT))
-        self.destroy()
+
+    def change_state_label(self, state_str):
+        self.state.set_text(state_str)
+        state_description = RubiksCube.state_str_to_state_description(state_str)
+        self.state_tooltip.bind(self.state, state_description)
 
     def _add_events_raisers(self):
+        # Adds all callbacks to hook Tkinter events to event_hub
         # TODO add keypress
         self.protocol("WM_DELETE_WINDOW", self.on_close)
         self.copy_button.bind("<Button>", self.copy_state_to_clipboard)
@@ -129,8 +134,8 @@ class Dashboard(tk.Tk):
                        lambda ev: self.event_hub.raise_event(
                            Event(origin=Event.TKINTER, type=Event.CAMERA_MOVE, direction="DOWN", angle=angle_move))
                        )
-        self.rot_toggle.add_callback(
-            lambda ev: self.event_hub.raise_event(Event(origin=Event.TKINTER, type=Event.CAMERA_TOGGLE_ROT)))
+        self.rot_toggle.bind("<Button>",
+                             lambda ev: self.event_hub.raise_event(Event(origin=Event.TKINTER, type=Event.CAMERA_TOGGLE_ROT)))
 
         self.move_F.bind("<Button>",
                          lambda ev: self.event_hub.raise_event(
