@@ -1,5 +1,7 @@
 import pygame as pg
 
+from utils import Queue
+
 
 class Event:
     """Dummy event class."""
@@ -11,13 +13,18 @@ class Event:
     CUBE_MOVE_FACE = "MOVE_FACE"
     CUBE_SHUFFLE = "CUBE_SHUFFLE"
 
-    CAMERA_MOVE = "MOVE_CAMERA"
+    CAMERA_MOVE = "CAMERA_MOVE"
+    CAMERA_MOVE_ABOUT = "CAMERA_MOVE_ABOUT"
     CAMERA_RESET = "CAMERA_RESET"
     CAMERA_TOGGLE_ROT = "CAMERA_TOGGLE_ROT"
 
     # keys
     ESCAPE = "\x1b"
     SPACE = " "
+    ARROW_DOWN = pg.K_DOWN
+    ARROW_UP = pg.K_UP
+    ARROW_LEFT = pg.K_LEFT
+    ARROW_RIGHT = pg.K_RIGHT
 
     # origins
     PYGAME = "PYGAME"
@@ -32,7 +39,6 @@ class Event:
 
 
 class EventsHub:
-    # TODO Thread safety
     """Implements an event aggregator to gather events from both interfaces as well as the application itself.
     Similar to an Observer pattern.
 
@@ -44,26 +50,27 @@ class EventsHub:
      - pygame events (mouse / key press / quit)
      - tkinter events (mouse / key press / quit)
         - all buttons
-     - application events, like "AnimationFinishedEvent"
+     - application events, like "AnimationFinished" event
     """
 
     def __init__(self):
-        self._events = []  # TODO change to Queue
+        self._events = Queue()
         self._callbacks = {}
 
     def raise_event(self, event):
-        self._events.append(event)
+        self._events.put(event)
 
     def add_callback(self, event_name, callback):
         self._callbacks.setdefault(event_name, []).append(callback)
 
     def handle_events(self):
-        for event in self._events:
-            if event.type in [Event.CUBE_MOVE_FACE, Event.CAMERA_MOVE, Event.CAMERA_TOGGLE_ROT]:
+        while not self._events.empty():
+            event = self._events.pop()
+            if event.type in [Event.QUIT]:
                 print("Handling", event, self._callbacks.get(event.type, []))
+                pass
             for callback in self._callbacks.get(event.type, []):
                 callback(event)
-        self._events = []
 
 
 if __name__ == '__main__':
@@ -74,3 +81,6 @@ if __name__ == '__main__':
     while True:
         for event in pg.event.get():
             print(event, event.__dict__)
+            if event.type == pg.QUIT:
+                pg.quit()
+                quit()

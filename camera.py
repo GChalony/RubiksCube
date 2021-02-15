@@ -36,6 +36,9 @@ class Camera:
             rot = Rotation.from_rotvec([sign * angle, 0, 0])
             self.camera_rot = rot * self.camera_rot
 
+    def rotate_about(self, rot_vect):
+        self.camera_rot = Rotation.from_rotvec(rot_vect) * self.camera_rot
+
     def toggle_cube_rot(self):
         if np.linalg.norm(self.rot_delta.as_rotvec()) < 0.01:
             self.rot_delta = Rotation.from_rotvec([0, self.SLOW_ROT_SPEED, 0])
@@ -45,6 +48,8 @@ class Camera:
     def _add_listeners(self):
         self.event_hub.add_callback(Event.CAMERA_MOVE,
                                     lambda event: self.rotate(event.direction, event.angle))
+        self.event_hub.add_callback(Event.CAMERA_MOVE_ABOUT,
+                                    lambda event: self.rotate_about(event.rot_vec))
         self.event_hub.add_callback(Event.CAMERA_RESET,
                                     lambda ev: self.reset_view())
         self.event_hub.add_callback(Event.CAMERA_TOGGLE_ROT,
