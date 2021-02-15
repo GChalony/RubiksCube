@@ -3,7 +3,7 @@ from tkinter import font
 
 import numpy as np
 
-from rubikscube_drawer import RubiksCubeDrawer
+from rubikscube.rubikscube import RubiksCube
 from ui.custom_widgets import SectionTitle, ArrowButton, MoveButton, WrappedLabel, SolverControls, ToggleButton2
 from ui.events_hub import EventsHub, Event
 

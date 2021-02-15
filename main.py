@@ -5,7 +5,7 @@ import pygame as pg
 
 from camera import Camera
 from opengl_app import OpenGLApp
-from rubikscube_drawer import RubiksCubeDrawer
+from rubikscube.rubikscube_drawer import RubiksCubeDrawer
 from ui.dashboard import Dashboard
 from ui.events_hub import EventsHub, Event
 
