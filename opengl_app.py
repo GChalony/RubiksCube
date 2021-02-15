@@ -7,12 +7,15 @@ from pygame.locals import *
 
 from ui.events_hub import EventsHub, Event
 
+# TODO document all flow here
 
 class OpenGLApp:
     """Create a basic OpenGL window using pygame."""
 
     def __init__(self, event_hub: EventsHub):
         self.event_hub = event_hub
+        self.closed = False  # Close flag to interupt main loop
+        self._start_animation_events = {}
         self._add_listeners()
 
     def setup(self):
@@ -102,9 +105,9 @@ class OpenGLApp:
                     self.event_hub.raise_event(event)
             self._add_animation_events()
 
-    def close(self, event):
+    def close(self, close_event):
+        self.closed = True
         pg.quit()
-        quit()
 
     def _add_listeners(self):
         self.event_hub.add_callback(Event.NEWFRAME, self._gather_events)
