@@ -11,23 +11,21 @@ from ui.events_hub import EventsHub, Event
 
 
 def run_cube_sim():
+    """Run main pygame loop, and handle events at each loop."""
     global cube, event_hub, app
-
     app.setup()
-
     clock = pg.time.Clock()
     clock.tick()
 
-    while True:
+    while not app.closed:
         app.draw_frame(cube)
 
         dt = clock.tick(30)
-        event_hub.raise_event(Event(origin=Event.APPLICATION, type=Event.NEWFRAME, dt=dt))
-        event_hub.handle_events()
+        app.event_hub.raise_event(Event(origin=Event.APPLICATION, type=Event.NEWFRAME, dt=dt))
+        app.event_hub.handle_events()
 
 
 def run_controls_ui():
-    global dash
     dash.mainloop()
 
 
@@ -38,7 +36,7 @@ camera = Camera(event_hub)
 app = OpenGLApp(event_hub)
 dash = Dashboard(event_hub)
 
-
+# TODO profile
 tCube = Thread(target=run_cube_sim)
 tCube.start()
 

@@ -33,41 +33,74 @@ class OpenGLApp:
     def _pygame_event_to_event(self, pg_event):
         """Translate pygame event to homemade event object,
         and discard the ones not interesting."""
-        print(pg_event)
+        # print(pg_event)
         event = Event(origin="pygame")
+        time = pg.time.get_ticks()
         if pg_event.type == pg.QUIT or (pg_event.type == pg.KEYDOWN and pg_event.unicode == "q"):
             event.type = Event.QUIT
         elif pg_event.type == pg.KEYDOWN and pg_event.unicode == Event.SPACE:
             event.type = Event.CAMERA_TOGGLE_ROT
-        elif pg_event.type in [pg.KEYDOWN, pg.KEYUP]:
-            if pg_event.type == pg.KEYDOWN and pg_event.unicode.lower() in ["f", "b", "u", "d", "l", "r"]:
+        elif pg_event.type == pg.KEYDOWN and pg_event.unicode == Event.ESCAPE:
+            event.type = Event.CAMERA_RESET
+        elif pg_event.type == pg.KEYDOWN:
+            if pg_event.unicode.lower() in ["f", "b", "u", "d", "l", "r"]:
                 event.type = Event.CUBE_MOVE_FACE
                 event.face = pg_event.unicode.capitalize()
                 event.reverse = pg_event.unicode.isupper()
-            # TODO figure out keys and mouse press
+            elif pg_event.key in [pg.K_UP, pg.K_RIGHT, pg.K_LEFT, pg.K_DOWN]:
+                self._start_animation_events[pg_event.key] = time
+        elif pg_event.type == pg.KEYUP:
+            self._start_animation_events.pop(pg_event.key, None)
+        elif pg_event.type == pg.MOUSEBUTTONDOWN and pg_event.button == pg.BUTTON_LEFT:
+            self._start_animation_events[pg.MOUSEBUTTONDOWN] = time
+            pg.mouse.get_rel()
+        elif pg_event.type == pg.MOUSEBUTTONUP:
+            self._start_animation_events.pop(pg.MOUSEBUTTONDOWN, None)
 
-        # TODO add mouse
-
-        #     elif pg_event.type == pg.KEYUP:
-        #         event.type = Event.KEYUP
-        # elif pg_event.type == pg.MOUSEMOTION:
-        #     event.type = Event.MOUSEMOTION
-        #     event.pos = pg_event.pos
-        #     event.rel = pg_event.rel
-        # elif pg_event.type == pg.MOUSEBUTTONDOWN:
-        #     event.type = Event.MOUSEBUTTONDOWN
-        #     event.button = pg_event.button
-        # elif pg_event.type == pg.MOUSEBUTTONUP:
-        #     event.type = Event.MOUSEBUTTONUP
-        #     event.button = pg_event.button
         if hasattr(event, "type"):  # Check if event not discarded
             return event
 
+    def _direction_for_key(self, key):
+        if key == Event.ARROW_UP:
+            return "UP"
+        elif key == Event.ARROW_DOWN:
+            return "DOWN"
+        elif key == Event.ARROW_RIGHT:
+            return "RIGHT"
+        elif key == Event.ARROW_LEFT:
+            return "LEFT"
+
+    def _add_animation_events(self):
+        """Process animations (registered in self._start_animation_event)
+        to create an event at each frame until the end of animation.
+        """
+        time = pg.time.get_ticks()
+        for source, start in self._start_animation_events.items():
+            if source in [Event.ARROW_RIGHT, Event.ARROW_UP, Event.ARROW_DOWN, Event.ARROW_LEFT]:  # Arrow key press
+                event = Event(origin=Event.PYGAME, type=Event.CAMERA_MOVE,
+                              angle=(time - start) / 4000,
+                              direction=self._direction_for_key(source))
+            elif source == pg.MOUSEBUTTONDOWN:  # Mouse click and drag
+                dx, dy = pg.mouse.get_rel()
+                dt = time - start
+                if dt == 0:
+                    continue
+                scale = 2
+                event = Event(origin=Event.PYGAME, type=Event.CAMERA_MOVE_ABOUT,
+                              rot_vec=[dy / dt / scale, dx / dt / scale, 0])
+                self._start_animation_events[source] = time
+            else:
+                raise ValueError(f"Unknown animation key {source}")
+            self.event_hub.raise_event(event)
+
     def _gather_events(self, newframe_event):
-        for pg_event in pg.event.get():
-            event = self._pygame_event_to_event(pg_event)
-            if event is not None:
-                self.event_hub.raise_event(event)
+        """Read input events in pygame and register them to event_hub"""
+        if not self.closed:
+            for pg_event in pg.event.get():
+                event = self._pygame_event_to_event(pg_event)
+                if event is not None:
+                    self.event_hub.raise_event(event)
+            self._add_animation_events()
 
     def close(self, event):
         pg.quit()
