@@ -35,7 +35,7 @@ class Dashboard(tk.Tk):
         self.state_label.pack(fill=tk.X, ipady=5)
         sf = tk.Frame(self)
         self.state = WrappedLabel(sf, text=RubiksCube.SOLVED_STR, justify=tk.LEFT)
-        self.state_tooltip.bind(self.state, RubiksCube.state_str_to_state_description(RubiksCube.SOLVED_STR))
+        self.state_tooltip.bind(self.state, state_str_to_state_description(RubiksCube.SOLVED_STR))
         copy_logo = tk.PhotoImage(file="images/copy.png")
         self.copy_button = tk.Button(sf, image=copy_logo, bd=0)
         self.copy_button.image = copy_logo
@@ -138,7 +138,7 @@ class Dashboard(tk.Tk):
 
     def change_state_label(self, state_str):
         self.state.set_text(state_str)
-        state_description = RubiksCube.state_str_to_state_description(state_str)
+        state_description = state_str_to_state_description(state_str)
         self.state_tooltip.bind(self.state, state_description)
 
     def on_animation_finished(self, event):

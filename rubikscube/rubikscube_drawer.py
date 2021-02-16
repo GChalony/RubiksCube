@@ -6,6 +6,7 @@ from OpenGL.GL import *
 from pygame.locals import *
 from scipy.spatial.transform import Rotation
 
+from rubikscube.core import get_normal
 from rubikscube.rubikscube import RubiksCube
 from ui.events_hub import Event, EventsHub
 from utils import Color, Queue
@@ -83,7 +84,7 @@ class RubiksCubeDrawer:
 
         speed_rad = np.radians(speed_deg)
         delta = -speed_rad if not anim.reverse else speed_rad
-        rot_vec = delta * self.state.get_normal(anim.face)
+        rot_vec = delta * get_normal(anim.face)
         rot = Rotation.from_rotvec(rot_vec)
         for cube in anim.cubes:
             cube.rotate(rot)
