@@ -4,7 +4,9 @@ from tkinter import font
 import Pmw
 import numpy as np
 
+from rubikscube.core import state_str_to_state_description
 from rubikscube.rubikscube import RubiksCube
+from rubikscube.solvers.kociemba_solver import KociembaSolver
 from ui.custom_widgets import SectionTitle, ArrowButton, MoveButton, WrappedLabel, SolverControls, ToggleButton2
 from ui.events_hub import EventsHub, Event
 
@@ -12,6 +14,8 @@ from ui.events_hub import EventsHub, Event
 class Dashboard(tk.Tk):
     def __init__(self, event_hub: EventsHub):
         super().__init__()
+        self.kociemba_solver = KociembaSolver()
+
         self.state_tooltip = Pmw.Balloon(self)
         self.state_tooltip.configure(label_font=("Courier", 8))
         self.tooltip = Pmw.Balloon(self)
@@ -39,6 +43,8 @@ class Dashboard(tk.Tk):
         self.state.pack(side=tk.LEFT, fill=tk.X, expand=True)
         self.copy_button.pack(side=tk.LEFT)
         sf.pack(fill=tk.X)
+        self.shuffle = tk.Button(self, text="Shuffle")  # TODO connect
+        self.shuffle.pack()
         self.state.pack()
 
     def _create_view(self):
@@ -117,8 +123,9 @@ class Dashboard(tk.Tk):
         self.solving_label.pack(fill=tk.X, ipady=5)
         basic = SolverControls(self, "Basic Solver")
         basic.pack()
-        kocima = SolverControls(self, "Kocima Solver")
-        kocima.pack()
+        self.kociemba = SolverControls(self, "Kociemba Solver")
+        self.tooltip.bind(self.kociemba, "Kociemba solution")
+        self.kociemba.pack()
 
     def copy_state_to_clipboard(self, event=None):
         state = self.state.get_text()
@@ -134,9 +141,16 @@ class Dashboard(tk.Tk):
         state_description = RubiksCube.state_str_to_state_description(state_str)
         self.state_tooltip.bind(self.state, state_description)
 
+    def on_animation_finished(self, event):
+        self.change_state_label(event.state_str)
+        if event.is_solved:
+            self.kociemba.edit_solution("Solved!", fg="green")
+        else:
+            self.kociemba_solver.solve(event.state_str,
+                                       lambda sol: self.kociemba.edit_solution(sol, fg="black"))
+
     def _add_events_raisers(self):
         # Adds all callbacks to hook Tkinter events to event_hub
-        # TODO add keypress
         self.protocol("WM_DELETE_WINDOW", self.on_close)
         self.copy_button.bind("<Button>", self.copy_state_to_clipboard)
 
@@ -199,6 +213,5 @@ class Dashboard(tk.Tk):
 
     def _add_listeners(self):
         self.event_hub.add_callback(Event.QUIT, lambda ev: self.quit())
-        self.event_hub.add_callback(Event.ANIMATIONFINISHED,
-                                    lambda ev: self.change_state_label(ev.state_str))
+        self.event_hub.add_callback(Event.ANIMATIONFINISHED, self.on_animation_finished)
         self.event_hub.add_callback(Event.CAMERA_TOGGLE_ROT, self.rot_toggle.toggle)
