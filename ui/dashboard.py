@@ -51,7 +51,7 @@ class Dashboard(tk.Tk):
         self.up = ArrowButton(frame, type="up")
         self.down = ArrowButton(frame, type="down")
         self.right = ArrowButton(frame, type="right")
-        self.rot_toggle = ToggleButton2(frame, text="rot")
+        self.rot_toggle = ToggleButton2(frame, text="rot", toggled=True)
         self.tooltip.bind(self.reset, "Reset view (Esc)")
         self.tooltip.bind(self.left, "Rotate left (Left arrow)")
         self.tooltip.bind(self.up, "Rotate up (Up arrow)")

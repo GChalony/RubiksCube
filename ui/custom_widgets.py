@@ -78,7 +78,7 @@ class SolverControls(Frame):
 
 
 class ToggleButton2(Frame):
-    def __init__(self, master, text):
+    def __init__(self, master, text, toggled=False):
         super().__init__(master, background="red", width=10)
         self._width = 25
         self._height = 20
@@ -90,6 +90,8 @@ class ToggleButton2(Frame):
         self.bind("<Button>", lambda ev: print("Clicked!"))
         self._callbacks = []
         self._draw()
+        if toggled:
+            self.toggle()
 
     def _draw(self):
         self._canvas.delete("all")
