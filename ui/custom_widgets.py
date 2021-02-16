@@ -71,10 +71,20 @@ class SolverControls(Frame):
     def __init__(self, master, name, **kwargs):
         super().__init__(master, **kwargs)
         self.title = Label(self, text=name, font=("Arial", 15))
+        nf = Frame(self)
+        n_moves_txt = Label(nf, text="Number of moves:")
+        self.n_moves = Label(nf, text="0")
+        n_moves_txt.pack(side=LEFT)
+        self.n_moves.pack(side=LEFT)
+        self.solution = Label(self, text="...", wraplength=150)
         self.title.pack()
-        todo = Label(self, text="TODO...", background="yellow")
-        todo.pack()
-        # TODO add name / buttons / loader / moves count / suggested moves
+        nf.pack()
+        self.solution.pack()
+
+    def edit_solution(self, solution, fg=None):
+        self.solution.config(text=solution)
+        self.solution.config(fg=fg)
+        self.n_moves.config(text=str(len(solution.split(" "))))
 
 
 class ToggleButton2(Frame):
