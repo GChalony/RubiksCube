@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from threading import Thread
 
 import numpy as np
 import pygame
@@ -101,9 +102,13 @@ class RubiksCubeDrawer:
             c.rotation = Rotation.from_euler("xyz", rot)
 
         self._animation.pop()
-        # TODO do in different thread
+        thread = Thread(target=self._raise_animation_finished)
+        thread.start()
+
+    def _raise_animation_finished(self):
         self.event_hub.raise_event(Event(origin=Event.APPLICATION, type=Event.ANIMATIONFINISHED,
-                                         state_str=self.state.compute_state_string()))
+                                         state_str=self.state.compute_state_string(),
+                                         is_solved=self.state.is_solved()))
 
     def move_face(self, face, angle=90, reverse=False):
         """Start move face animation."""
