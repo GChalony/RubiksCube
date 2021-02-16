@@ -8,6 +8,7 @@ from opengl_app import OpenGLApp
 from rubikscube.rubikscube_drawer import RubiksCubeDrawer
 from ui.dashboard import Dashboard
 from ui.events_hub import EventsHub, Event
+from utils import profile
 
 
 def run_cube_sim():
@@ -29,16 +30,18 @@ def run_controls_ui():
     dash.mainloop()
 
 
-event_hub = EventsHub()
-cube = RubiksCubeDrawer(event_hub)
-camera = Camera(event_hub)
+if __name__ == '__main__':
+    with profile(on=False):
+        event_hub = EventsHub()
+        cube = RubiksCubeDrawer(event_hub)
+        camera = Camera(event_hub)
 
-app = OpenGLApp(event_hub)
-dash = Dashboard(event_hub)
+        app = OpenGLApp(event_hub)
+        dash = Dashboard(event_hub)
 
-# TODO profile
-tCube = Thread(target=run_cube_sim)
-tCube.start()
+        tCube = Thread(target=run_cube_sim)
+        tCube.start()
 
-run_controls_ui()  # Tkinter needs to be called from main thread
-tCube.join()
+        run_controls_ui()  # Tkinter needs to be called from main thread
+        tCube.join()
+

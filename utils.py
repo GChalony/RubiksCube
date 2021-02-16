@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from threading import Lock
 
 
@@ -37,3 +38,19 @@ class Queue:
         with self._lock:
             return len(self._list) == 0
 
+
+@contextmanager
+def profile(on=True):
+    if not on:
+        yield
+        return
+
+    import yappi
+
+    yappi.set_clock_type("cpu")
+    yappi.start()
+
+    yield
+
+    yappi.get_func_stats().print_all()
+    yappi.get_thread_stats().print_all()

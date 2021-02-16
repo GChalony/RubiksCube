@@ -7,7 +7,6 @@ from pygame.locals import *
 
 from ui.events_hub import EventsHub, Event
 
-# TODO document all flow here
 
 class OpenGLApp:
     """Create a basic OpenGL window using pygame."""
