@@ -141,7 +141,7 @@ class Dashboard(tk.Tk):
         state_description = state_str_to_state_description(state_str)
         self.state_tooltip.bind(self.state, state_description)
 
-    def on_animation_finished(self, event):
+    def on_state_changed(self, event):
         self.change_state_label(event.state_str)
         if event.is_solved:
             self.kociemba.edit_solution("Solved!", fg="green")
@@ -229,5 +229,5 @@ class Dashboard(tk.Tk):
 
     def _add_listeners(self):
         self.event_hub.add_callback(Event.QUIT, lambda ev: self.quit())
-        self.event_hub.add_callback(Event.ANIMATIONFINISHED, self.on_animation_finished)
+        self.event_hub.add_callback(Event.CUBE_STATE_CHANGED, self.on_state_changed)
         self.event_hub.add_callback(Event.CAMERA_TOGGLE_ROT, self.rot_toggle.toggle)

@@ -25,6 +25,7 @@ class FaceRotationAnimation:
 
 
 class RubiksCubeDrawer:
+    # TODO separate state.cubes from self.cubes
     def __init__(self, event_hub: EventsHub):
         self.state = RubiksCube()
         self._animation: Queue = Queue()  # Stores animations to move faces
@@ -104,11 +105,10 @@ class RubiksCubeDrawer:
             c.rotation = Rotation.from_euler("xyz", rot)
 
         self._animation.pop()
-        thread = Thread(target=self._raise_animation_finished)
-        thread.start()
+        self._raise_state_changed()
 
-    def _raise_animation_finished(self):
-        self.event_hub.raise_event(Event(origin=Event.APPLICATION, type=Event.ANIMATIONFINISHED,
+    def _raise_state_changed(self):
+        self.event_hub.raise_event(Event(origin=Event.APPLICATION, type=Event.CUBE_STATE_CHANGED,
                                          state_str=self.state.compute_state_string(),
                                          is_solved=self.state.is_solved()))
 
@@ -130,3 +130,4 @@ class RubiksCubeDrawer:
     def shuffle(self):
         self._animation.remove_all()
         self.state.shuffle()
+        self._raise_state_changed()

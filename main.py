@@ -31,11 +31,13 @@ def run_controls_ui():
     dash.mainloop()
 
 
+# TODO thread for event_hub ?
+
 if __name__ == '__main__':
     with profile(on=False):
         event_hub = EventsHub()
         cube = RubiksCubeDrawer(event_hub)
-        cube.load_state(RubiksCube.SOLVED_STR)
+        # cube.load_state(RubiksCube.SOLVED_STR)
 
         camera = Camera(event_hub)
 
