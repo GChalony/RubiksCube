@@ -43,7 +43,7 @@ class Dashboard(tk.Tk):
         self.state.pack(side=tk.LEFT, fill=tk.X, expand=True)
         self.copy_button.pack(side=tk.LEFT)
         sf.pack(fill=tk.X)
-        self.shuffle = tk.Button(self, text="Shuffle")  # TODO connect
+        self.shuffle = tk.Button(self, text="Shuffle")
         self.shuffle.pack()
         self.state.pack()
 
@@ -159,6 +159,8 @@ class Dashboard(tk.Tk):
         # Adds all callbacks to hook Tkinter events to event_hub
         self.protocol("WM_DELETE_WINDOW", self.on_close)
         self.copy_button.bind("<Button>", self.copy_state_to_clipboard)
+        self.shuffle.bind("<Button>",
+                          lambda ev: self.event_hub.raise_event(Event(type=Event.CUBE_SHUFFLE)))
 
         angle_move = np.radians(10)
         self.reset.bind("<Button>",

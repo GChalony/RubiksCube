@@ -2,7 +2,7 @@ import kociemba
 import numpy as np
 from scipy.spatial.transform.rotation import Rotation
 
-from rubikscube.core import generate_cubes, get_normal, get_face_for_normal, get_cubes_on_face
+from rubikscube.core import generate_cubes, get_normal, get_face_for_normal, get_cubes_on_face, generate_cubes_from_state_str
 
 
 class RubiksCube:
@@ -59,22 +59,10 @@ class RubiksCube:
 
     def is_solved(self):
         state = self.compute_state_string()
-        return state == "UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB"
+        return state == RubiksCube.SOLVED_STR
 
     def load_state(self, state_str):
-        # Check valid
-        try:
-            kociemba.solve(state_str)
-        except ValueError as e:
-            raise ValueError(f"Invalid state string {state_str}")
-        for i, face in enumerate(["U", "R", "F", "D", "L", "B"]):
-            cubes = self.get_cubes_on_face(face)
-            normal = get_normal(face)
-            for j, cube in enumerate(cubes):
-                vect = cube.rotation.inv().apply(normal)
-                f = get_face_for_normal(vect)
-                # TODO find rotation for cube then apply colors
-
+        self.cubes = generate_cubes_from_state_str(state_str, self.offset)
         self.state_string = state_str
         self.history_moves = []
 
