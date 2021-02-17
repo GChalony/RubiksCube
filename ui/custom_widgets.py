@@ -3,6 +3,7 @@ from tkinter.font import nametofont, BOLD
 
 
 class WrappedLabel(Label):
+    # TODO double click to edit state
     def __init__(self, master, text, **kwargs):
         self._txt = text
         super().__init__(master, **kwargs)
@@ -53,18 +54,22 @@ class ArrowButton(Button):
         super().pack(**kwargs)
 
 
-class MoveButton(Button):
-    def __init__(self, master, face, reverse=False, **kwargs):
-        image_path = "images/rot_" + face
-        if reverse: image_path += "'"
-        image_path += ".png"
+class ImagedButton(Button):
+    def __init__(self, master, image_path, **kwargs):
         self.image = PhotoImage(file=image_path)
-
         super().__init__(master, image=self.image, bd=0, **kwargs)
 
     def pack(self, **kwargs):
         kwargs = {"padx": 4, "pady": 4, **kwargs}
         super().pack(**kwargs)
+
+
+class MoveButton(ImagedButton):
+    def __init__(self, master, face, reverse=False, **kwargs):
+        image_path = "images/rot_" + face
+        if reverse: image_path += "'"
+        image_path += ".png"
+        super().__init__(master, image_path=image_path, **kwargs)
 
 
 class SolverControls(Frame):
@@ -77,9 +82,16 @@ class SolverControls(Frame):
         n_moves_txt.pack(side=LEFT)
         self.n_moves.pack(side=LEFT)
         self.solution = Label(self, text="...", wraplength=150)
+        controls = Frame(self)
+        self.forward = ImagedButton(controls, image_path="images/forward2.png")
+        self.fastforward = ImagedButton(controls, image_path="images/fastforward2.png")
+
         self.title.pack()
         nf.pack()
         self.solution.pack()
+        self.forward.pack(side=LEFT)
+        self.fastforward.pack(side=LEFT)
+        controls.pack()
 
     def edit_solution(self, solution, fg=None):
         self.solution.config(text=solution)

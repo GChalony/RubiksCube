@@ -149,6 +149,12 @@ class Dashboard(tk.Tk):
             self.kociemba_solver.compute_solution(event.state_str,
                                                   lambda sol: self.kociemba.edit_solution(sol, fg="black"))
 
+    def apply_all_moves(self, moves):
+        for move in moves:
+            self.event_hub.raise_event(
+                Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face=move)
+            )
+
     def _add_events_raisers(self):
         # Adds all callbacks to hook Tkinter events to event_hub
         self.protocol("WM_DELETE_WINDOW", self.on_close)
@@ -210,6 +216,14 @@ class Dashboard(tk.Tk):
         self.move_Rr.bind("<Button>",
                           lambda ev: self.event_hub.raise_event(
                               Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="R'")))
+
+        self.kociemba.forward.bind("<Button>",
+                                   lambda ev: self.event_hub.raise_event(
+                                       Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE,
+                                             face=self.kociemba_solver.get_next_move())
+                                   ))
+        self.kociemba.fastforward.bind("<Button>",
+                                   lambda ev: self.apply_all_moves(self.kociemba_solver.get_all_moves()))
 
     def _add_listeners(self):
         self.event_hub.add_callback(Event.QUIT, lambda ev: self.quit())
