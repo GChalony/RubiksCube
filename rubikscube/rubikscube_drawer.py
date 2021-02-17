@@ -33,7 +33,7 @@ class RubiksCubeDrawer:
 
     def _add_listeners(self):
         self.event_hub.add_callback(Event.CUBE_MOVE_FACE,
-                                    lambda event: self.move_face(event.face, 90, event.reverse))
+                                    lambda event: self.move_face(event.face))
         self.event_hub.add_callback(Event.NEWFRAME,
                                     lambda event: self._animate(event.dt))
 
@@ -110,8 +110,11 @@ class RubiksCubeDrawer:
                                          state_str=self.state.compute_state_string(),
                                          is_solved=self.state.is_solved()))
 
-    def move_face(self, face, angle=90, reverse=False):
+    def move_face(self, move):
         """Start move face animation."""
+        face = move[0]
+        reverse = "'" in move
+        angle = 90 * (1 + ("2" in move))
         self._animation.put(
             FaceRotationAnimation(face=face, start=pygame.time.get_ticks(),
                                   current_angle=0, target_angle=angle, reverse=reverse)

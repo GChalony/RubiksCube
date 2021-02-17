@@ -48,7 +48,8 @@ class OpenGLApp:
             if pg_event.unicode.lower() in ["f", "b", "u", "d", "l", "r"]:
                 event.type = Event.CUBE_MOVE_FACE
                 event.face = pg_event.unicode.capitalize()
-                event.reverse = pg_event.unicode.isupper()
+                if pg_event.unicode.isupper():
+                    event.face += "'"
             elif pg_event.key in [pg.K_UP, pg.K_RIGHT, pg.K_LEFT, pg.K_DOWN]:
                 self._start_animation_events[pg_event.key] = time
         elif pg_event.type == pg.KEYUP:

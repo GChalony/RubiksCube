@@ -146,8 +146,8 @@ class Dashboard(tk.Tk):
         if event.is_solved:
             self.kociemba.edit_solution("Solved!", fg="green")
         else:
-            self.kociemba_solver.solve(event.state_str,
-                                       lambda sol: self.kociemba.edit_solution(sol, fg="black"))
+            self.kociemba_solver.compute_solution(event.state_str,
+                                                  lambda sol: self.kociemba.edit_solution(sol, fg="black"))
 
     def _add_events_raisers(self):
         # Adds all callbacks to hook Tkinter events to event_hub
@@ -176,40 +176,40 @@ class Dashboard(tk.Tk):
 
         self.move_F.bind("<Button>",
                          lambda ev: self.event_hub.raise_event(
-                             Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="F", reverse=False)))
+                             Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="F")))
         self.move_B.bind("<Button>",
                          lambda ev: self.event_hub.raise_event(
-                             Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="B", reverse=False)))
+                             Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="B")))
         self.move_U.bind("<Button>",
                          lambda ev: self.event_hub.raise_event(
-                             Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="U", reverse=False)))
+                             Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="U")))
         self.move_D.bind("<Button>",
                          lambda ev: self.event_hub.raise_event(
-                             Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="D", reverse=False)))
+                             Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="D")))
         self.move_L.bind("<Button>",
                          lambda ev: self.event_hub.raise_event(
-                             Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="L", reverse=False)))
+                             Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="L")))
         self.move_R.bind("<Button>",
                          lambda ev: self.event_hub.raise_event(
-                             Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="R", reverse=False)))
+                             Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="R")))
         self.move_Fr.bind("<Button>",
                           lambda ev: self.event_hub.raise_event(
-                              Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="F", reverse=True)))
+                              Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="F'")))
         self.move_Br.bind("<Button>",
                           lambda ev: self.event_hub.raise_event(
-                              Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="B", reverse=True)))
+                              Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="B'")))
         self.move_Ur.bind("<Button>",
                           lambda ev: self.event_hub.raise_event(
-                              Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="U", reverse=True)))
+                              Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="U'")))
         self.move_Dr.bind("<Button>",
                           lambda ev: self.event_hub.raise_event(
-                              Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="D", reverse=True)))
+                              Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="D'")))
         self.move_Lr.bind("<Button>",
                           lambda ev: self.event_hub.raise_event(
-                              Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="L", reverse=True)))
+                              Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="L'")))
         self.move_Rr.bind("<Button>",
                           lambda ev: self.event_hub.raise_event(
-                              Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="R", reverse=True)))
+                              Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="R'")))
 
     def _add_listeners(self):
         self.event_hub.add_callback(Event.QUIT, lambda ev: self.quit())
