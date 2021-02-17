@@ -5,6 +5,7 @@ import pygame as pg
 
 from camera import Camera
 from opengl_app import OpenGLApp
+from rubikscube.rubikscube import RubiksCube
 from rubikscube.rubikscube_drawer import RubiksCubeDrawer
 from ui.dashboard import Dashboard
 from ui.events_hub import EventsHub, Event
@@ -34,6 +35,8 @@ if __name__ == '__main__':
     with profile(on=False):
         event_hub = EventsHub()
         cube = RubiksCubeDrawer(event_hub)
+        cube.load_state(RubiksCube.SOLVED_STR)
+
         camera = Camera(event_hub)
 
         app = OpenGLApp(event_hub)

@@ -36,6 +36,8 @@ class RubiksCubeDrawer:
                                     lambda event: self.move_face(event.face))
         self.event_hub.add_callback(Event.NEWFRAME,
                                     lambda event: self._animate(event.dt))
+        self.event_hub.add_callback(Event.CUBE_SHUFFLE,
+                                    lambda event: self.shuffle())
 
     @staticmethod
     def _draw_square(corners, color):
@@ -119,3 +121,12 @@ class RubiksCubeDrawer:
             FaceRotationAnimation(face=face, start=pygame.time.get_ticks(),
                                   current_angle=0, target_angle=angle, reverse=reverse)
         )
+
+    def load_state(self, state_str):
+        # TODO check that doesn't break anything
+        self.state.load_state(state_str)
+        self._animation.remove_all()
+
+    def shuffle(self):
+        self._animation.remove_all()
+        self.state.shuffle()

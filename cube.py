@@ -24,11 +24,10 @@ class Cube:
 
     base_verticies = np.array([(x, y, z) for x in (-1, 1) for y in (-1, 1) for z in (-1, 1)]) / 2
 
-    def __init__(self, initial_position=None, colors=None, tesselation=1):
+    def __init__(self, initial_position=None, initial_rotation=None, colors=None):
         self.position = np.zeros(3) if initial_position is None else initial_position
-        self.rotation: Rotation = Rotation.identity()
+        self.rotation: Rotation = Rotation.identity() if initial_rotation is None else initial_rotation
         self.colors = self.COLORS if colors is None else colors
-        self.tesselation = tesselation
 
     @property
     def verticies(self):

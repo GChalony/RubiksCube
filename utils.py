@@ -38,6 +38,10 @@ class Queue:
         with self._lock:
             return len(self._list) == 0
 
+    def remove_all(self):
+        with self._lock:
+            self._list = []
+
 
 @contextmanager
 def profile(on=True):
