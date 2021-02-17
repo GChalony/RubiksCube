@@ -1,6 +1,7 @@
 """This module contains some fundamental functions regarding rubikscube states and representation."""
 
 import numpy as np
+from scipy.spatial.distance import cdist
 
 from cube import Cube
 from utils import Color
@@ -91,3 +92,18 @@ def get_face_for_normal(normal):
         return "B"
     else:
         raise ValueError(f"No face for normal {normal}")
+
+
+def get_cubes_on_face(cubes, face, offset):
+    """Returns the 9 cubes on given face, ordered from top_left to bottom right."""
+    normal = get_normal(face)
+    up = get_up_on_face(face)
+    right = np.cross(up, normal)
+    positions = [offset * (normal + x * right + y * up)
+                 for y in (1, 0, -1) for x in (-1, 0, 1)]
+    current_positions = [c.position for c in cubes]
+    dist_matrix = cdist(current_positions, positions)
+    cubes_ids = np.where((dist_matrix < 0.1).T)[1]
+    cubes = cubes[cubes_ids]
+    return cubes
+

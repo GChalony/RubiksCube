@@ -1,9 +1,8 @@
 import kociemba
 import numpy as np
-from scipy.spatial.distance import cdist
 from scipy.spatial.transform.rotation import Rotation
 
-from rubikscube.core import generate_cubes, get_normal, get_up_on_face, get_face_for_normal
+from rubikscube.core import generate_cubes, get_normal, get_face_for_normal, get_cubes_on_face
 
 
 class RubiksCube:
@@ -26,17 +25,7 @@ class RubiksCube:
         self.history_moves = []
 
     def get_cubes_on_face(self, face):
-        """Returns the 9 cubes on given face, ordered from top_left to bottom right."""
-        normal = get_normal(face)
-        up = get_up_on_face(face)
-        right = np.cross(up, normal)
-        positions = [self.offset * (normal + x * right + y * up)
-                     for y in (1, 0, -1) for x in (-1, 0, 1)]
-        current_positions = [c.position for c in self.cubes]
-        dist_matrix = cdist(current_positions, positions)
-        cubes_ids = np.where((dist_matrix < 0.1).T)[1]
-        cubes = self.cubes[cubes_ids]
-        return cubes
+        return get_cubes_on_face(self.cubes, face, self.offset)
 
     def compute_state_string(self):
         state_str = ""
@@ -78,7 +67,6 @@ class RubiksCube:
             kociemba.solve(state_str)
         except ValueError as e:
             raise ValueError(f"Invalid state string {state_str}")
-        # Need to change cubes colors, as if gluing stickers
         for i, face in enumerate(["U", "R", "F", "D", "L", "B"]):
             cubes = self.get_cubes_on_face(face)
             normal = get_normal(face)
