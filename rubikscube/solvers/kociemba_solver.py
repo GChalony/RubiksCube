@@ -8,7 +8,6 @@ class KociembaSolver:
         self._solution = None
 
     def get_next_move(self):
-        print(f"Next move: {self._solution=}")
         return self._solution.split(" ")[0] if not self.is_solved() else None
 
     def get_all_moves(self):

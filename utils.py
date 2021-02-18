@@ -49,12 +49,21 @@ def profile(on=True):
         yield
         return
 
+    import time
     import yappi
 
     yappi.set_clock_type("cpu")
     yappi.start()
+    start = time.time()
 
     yield
 
-    yappi.get_func_stats().print_all()
+    end = time.time()
+    stats = yappi.get_func_stats()
+    cpu = max([s.ttot for s in stats])
+    wall = end - start
+    stats.print_all()
     yappi.get_thread_stats().print_all()
+    print(f"\nTotal wall time: {wall}")
+    print(f"\nTotal CPU time: {cpu}")
+    print(f"Ratio: {cpu / wall: %}")
