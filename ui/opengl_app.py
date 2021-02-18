@@ -5,7 +5,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from pygame.locals import *
 
-from ui.events_hub import EventsHub, Event
+from events_hub import EventsHub, Event
 
 
 class OpenGLApp:

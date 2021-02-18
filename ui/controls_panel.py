@@ -8,7 +8,7 @@ from rubikscube.core import state_str_to_state_description
 from rubikscube.rubikscube import RubiksCube
 from rubikscube.solvers.kociemba_solver import KociembaSolver
 from ui.custom_widgets import SectionTitle, ArrowButton, MoveButton, WrappedLabel, SolverControls, ToggleButton2
-from ui.events_hub import EventsHub, Event
+from events_hub import EventsHub, Event
 
 
 class Dashboard(tk.Tk):

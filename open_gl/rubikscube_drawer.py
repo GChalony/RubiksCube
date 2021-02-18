@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from threading import Thread
 
 import numpy as np
 import pygame
@@ -9,7 +8,7 @@ from scipy.spatial.transform import Rotation
 
 from rubikscube.core import get_normal
 from rubikscube.rubikscube import RubiksCube
-from ui.events_hub import Event, EventsHub
+from events_hub import Event, EventsHub
 from utils import Color, Queue
 
 
@@ -55,10 +54,9 @@ class RubiksCubeDrawer:
 
     @staticmethod
     def _draw_cube(cube):
-        for face in cube.SURFACES.keys():
-            surface = np.array(cube.SURFACES[face])
+        for face, surface in cube.SURFACES.items():
             color = cube.colors[face]
-            corners = cube.verticies[surface]
+            corners = cube.verticies[np.array(surface)]
             RubiksCubeDrawer._draw_square(corners, color)
 
         glBegin(GL_LINES)
@@ -103,6 +101,7 @@ class RubiksCubeDrawer:
         for c, pos, rot in zip(self.state.cubes, round_positions, round_rotations):
             c.position = pos
             c.rotation = Rotation.from_euler("xyz", rot)
+            c.update_verticies()
 
         self._animation.pop()
         self._raise_state_changed()
@@ -123,7 +122,6 @@ class RubiksCubeDrawer:
         )
 
     def load_state(self, state_str):
-        # TODO check that doesn't break anything
         self.state.load_state(state_str)
         self._animation.remove_all()
 

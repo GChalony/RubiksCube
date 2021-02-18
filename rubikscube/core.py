@@ -4,7 +4,7 @@ import numpy as np
 from scipy.spatial.distance import cdist
 from scipy.spatial.transform.rotation import Rotation
 
-from cube import Cube
+from open_gl.cube import Cube
 from utils import Color
 
 X, Y, Z = np.eye(3, dtype=np.int8)

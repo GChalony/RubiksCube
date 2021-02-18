@@ -1,6 +1,4 @@
 import numpy as np
-from OpenGL.GL import *
-from pygame.locals import Color
 from scipy.spatial.transform.rotation import Rotation
 
 from utils import Color
@@ -28,13 +26,14 @@ class Cube:
         self.position = np.zeros(3) if initial_position is None else initial_position
         self.rotation: Rotation = Rotation.identity() if initial_rotation is None else initial_rotation
         self.colors = self.COLORS if colors is None else colors
+        self.update_verticies()
 
-    @property
-    def verticies(self):
-        return self.rotation.apply(self.base_verticies) + self.position
+    def update_verticies(self):
+        self.verticies = self.rotation.apply(self.base_verticies) + self.position
 
     def rotate(self, rot):
         self.rotation = rot * self.rotation
         self.position = rot.apply(self.position)
+        self.update_verticies()
 
 

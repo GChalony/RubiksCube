@@ -2,11 +2,11 @@ import numpy as np
 from OpenGL.GL import *
 from scipy.spatial.transform.rotation import Rotation
 
-from ui.events_hub import EventsHub, Event
+from events_hub import EventsHub, Event
 
 
 class Camera:
-    SLOW_ROT_SPEED = 0.02
+    SLOW_ROT_SPEED = 0.01
 
     def __init__(self, event_hub: EventsHub):
         self.camera_rot = Rotation.identity()

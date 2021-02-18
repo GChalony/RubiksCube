@@ -3,12 +3,11 @@ from threading import Thread
 
 import pygame as pg
 
-from camera import Camera
-from opengl_app import OpenGLApp
-from rubikscube.rubikscube import RubiksCube
-from rubikscube.rubikscube_drawer import RubiksCubeDrawer
-from ui.dashboard import Dashboard
-from ui.events_hub import EventsHub, Event
+from open_gl.camera import Camera
+from ui.opengl_app import OpenGLApp
+from open_gl.rubikscube_drawer import RubiksCubeDrawer
+from ui.controls_panel import Dashboard
+from events_hub import EventsHub, Event
 from utils import profile
 
 
@@ -22,7 +21,7 @@ def run_cube_sim():
     while not app.closed:
         app.draw_frame(cube)
 
-        dt = clock.tick(30)
+        dt = clock.tick(100)
         app.event_hub.raise_event(Event(origin=Event.APPLICATION, type=Event.NEWFRAME, dt=dt))
         app.event_hub.handle_events()
 
