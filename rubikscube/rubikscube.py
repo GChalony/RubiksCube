@@ -1,8 +1,10 @@
 import kociemba
 import numpy as np
+from colorama import Back
 from scipy.spatial.transform.rotation import Rotation
 
-from rubikscube.core import generate_cubes, get_normal, get_face_for_normal, get_cubes_on_face, generate_cubes_from_state_str
+from rubikscube.core import generate_cubes, get_normal, get_face_for_normal, \
+    generate_cubes_from_state_str, FACE_ORDER, ALL_MOVES, get_cube_ids_on_face, state_str_to_state_description
 
 
 class RubiksCube:
@@ -16,27 +18,52 @@ class RubiksCube:
      - List of cubes on one face (needed for animation)
      - Cubes permutation
     """
-    SOLVED_STR="UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB"
+    SOLVED_STR = "UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB"
+    TERM_COLORS = {"U": "\033[48;5;15m", "R": Back.GREEN, "F": "\033[48;5;202m",
+                   "D": "\033[48;5;11m", "L": Back.BLUE, "B": Back.RED}
 
     def __init__(self, state=None):
-        self.offset = 1.1
-        self.cubes = generate_cubes(self.offset)
-        self.state_string = state if state is not None else "UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB"
+        self.cubes = generate_cubes()
+        self._compute_state_string()
+        self.state_string = state if state is not None else self.SOLVED_STR
         self.history_moves = []
 
-    def get_cubes_on_face(self, face):
-        return get_cubes_on_face(self.cubes, face, self.offset)
+    def __repr__(self):
+        return self.state_string
 
-    def compute_state_string(self):
+    def __str__(self):
+        return state_str_to_state_description(self.state_string)
+
+    def pprint(self):
+        [u, r, f, d, l, b] = [self.state_string[9 * i: 9 * (i + 1)] for i in range(6)]
+        ordered = (*u, *l[:3], *f[:3], *r[:3], *b[:3],
+                   *l[3:6], *f[3:6], *r[3:6], *b[3:6],
+                   *l[6:9], *f[6:9], *r[6:9], *b[6:9], *d)
+        colors = [self.TERM_COLORS[f]+"   \033[0m" for f in ordered]
+        pattern = """\n         {}{}{}
+         {}{}{}
+         {}{}{}
+{}{}{}{}{}{}{}{}{}{}{}{}
+{}{}{}{}{}{}{}{}{}{}{}{}
+{}{}{}{}{}{}{}{}{}{}{}{}
+         {}{}{}
+         {}{}{}
+         {}{}{}"""
+        print(pattern.format(*colors))
+
+    def get_cubes_on_face(self, face):
+        return self.cubes[get_cube_ids_on_face(self.cubes, face)]
+
+    def _compute_state_string(self):
         state_str = ""
-        for face in ["U", "R", "F", "D", "L", "B"]:
+        for face in FACE_ORDER:
             cubes = self.get_cubes_on_face(face)
             normal = get_normal(face)
             for c in cubes:
                 vect = c.rotation.inv().apply(normal)
                 letter = get_face_for_normal(vect)
                 state_str += letter
-        return state_str
+        self.state_string = state_str
 
     def move(self, f):
         self.history_moves.append(f)
@@ -49,20 +76,21 @@ class RubiksCube:
         rot = Rotation.from_rotvec((1 + double) * sign * np.pi / 2 * normal)
         for cube in cubes:
             cube.rotate(rot)
+        self._compute_state_string()
 
     def shuffle(self, n=30):
-        possible_moves = ["F", "F'", "R", "R'", "L", "L'", "U", "U'", "D", "D'", "B", "B'"]
+        possible_moves = ALL_MOVES
         moves = np.random.choice(possible_moves, n)
         print("Shuffling: ", " ".join(moves))
         for move in moves:
             self.move(move)
+        return moves
 
     def is_solved(self):
-        state = self.compute_state_string()
-        return state == RubiksCube.SOLVED_STR
+        return self.state_string == RubiksCube.SOLVED_STR
 
     def load_state(self, state_str):
-        self.cubes = generate_cubes_from_state_str(state_str, self.offset)
+        self.cubes = generate_cubes_from_state_str(state_str)
         self.state_string = state_str
         self.history_moves = []
 
@@ -70,11 +98,11 @@ class RubiksCube:
 if __name__ == '__main__':
     cube = RubiksCube()
     cube.shuffle(30)
-    state = cube.compute_state_string()
+    state = cube.state_string
     print("State", state)
     solution = kociemba.solve(state)
     print("Applying solution", solution)
     for move in solution.split(" "):
         cube.move(move)
-    print(cube.compute_state_string())
+    print(cube.state_string)
     print("Solved!" if cube.is_solved() else "Not solved...")

@@ -2,11 +2,11 @@ from dataclasses import dataclass
 
 import numpy as np
 import pygame
-from OpenGL.GL import *
 from pygame.locals import *
 from scipy.spatial.transform import Rotation
 
-from rubikscube.core import get_normal
+from open_gl.cube import Cube
+from rubikscube.core import get_normal, get_cube_ids_on_face, FACE_ORDER
 from rubikscube.rubikscube import RubiksCube
 from events_hub import Event, EventsHub
 from utils import Color, Queue
@@ -15,6 +15,7 @@ from utils import Color, Queue
 @dataclass
 class FaceRotationAnimation:
     DEG_PER_SEC = 100
+    move: str
     face: str
     start: int
     current_angle: float
@@ -24,60 +25,57 @@ class FaceRotationAnimation:
 
 
 class RubiksCubeDrawer:
-    # TODO separate state.cubes from self.cubes
+    COLORS = {
+        "U": Color.WHITE,
+        "D": Color.YELLOW,
+        "L": Color.BLUE,
+        "R": Color.GREEN,
+        "F": Color.ORANGE,
+        "B": Color.RED
+    }
+    offset = 1.02
+
     def __init__(self, event_hub: EventsHub):
         self.state = RubiksCube()
+        self._generate_cubes(self.state.cubes)
         self._animation: Queue = Queue()  # Stores animations to move faces
         self.event_hub = event_hub
+
         self._add_listeners()
+
+    def _generate_cubes(self, state_cubes):
+        """Generate OpenGL cubes from state.cubes.
+        These two lists should remain synced at all times... or should they?
+        """
+        cubes = []
+        for c in state_cubes:
+            x, y, z = c.position
+            colors = {FACE_ORDER[i]: self.COLORS[v] if v is not None else Color.HIDDEN
+                      for i, v in enumerate(c.colors)}
+            cubes.append(Cube(self.offset * c.position, c.rotation, colors=colors))
+        self.cubes = np.array(cubes)
 
     def _add_listeners(self):
         self.event_hub.add_callback(Event.CUBE_MOVE_FACE,
-                                    lambda event: self.move_face(event.face))
+                                    lambda event: self.move(event.face))
         self.event_hub.add_callback(Event.NEWFRAME,
                                     lambda event: self._animate(event.dt))
         self.event_hub.add_callback(Event.CUBE_SHUFFLE,
                                     lambda event: self.shuffle())
 
-    @staticmethod
-    def _draw_square(corners, color):
-        """Draw a square using """
-        normal = np.cross(corners[3] - corners[0], corners[1] - corners[0])
-        normal = normal / np.linalg.norm(normal)
-        glNormal3fv(tuple(normal))
-        glColor3fv(color)
-        glBegin(GL_QUADS)
-        for vertex in corners:
-            glVertex3fv(tuple(vertex))
-        glEnd()
-        glColor3fv(Color.WHITE)
-
-    @staticmethod
-    def _draw_cube(cube):
-        for face, surface in cube.SURFACES.items():
-            color = cube.colors[face]
-            corners = cube.verticies[np.array(surface)]
-            RubiksCubeDrawer._draw_square(corners, color)
-
-        glBegin(GL_LINES)
-        glColor3fv(Color.BLACK)
-        for edge in cube.EDGES:
-            for v in edge:
-                vertex = cube.verticies[v]
-                glVertex3fv(tuple(vertex))
-        glEnd()
-
     def draw(self):
-        for cube in self.state.cubes:
-            RubiksCubeDrawer._draw_cube(cube)
+        for cube in self.cubes:
+            cube.draw()
 
     def _animate(self, dt):
-        # Needs to be called for each frame in case there are animations to run
+        # Needs to be called for each frame to run animations
         if self._animation.empty():
             return
         anim = self._animation.peek()  # Get current face animation
-        if anim.cubes is None:  # If first frame
-            anim.cubes = self.state.get_cubes_on_face(anim.face)
+        if anim.current_angle == 0:  # If first frame
+            cube_ids = get_cube_ids_on_face(self.state.cubes, anim.face)
+            anim.cubes = self.cubes[cube_ids]
+            self.state.move(anim.move)
 
         speed_deg = dt * anim.DEG_PER_SEC / 1000
         if anim.current_angle >= anim.target_angle - speed_deg:
@@ -93,14 +91,10 @@ class RubiksCubeDrawer:
         anim.current_angle += speed_deg
 
     def _finish_animation(self):
-        # Round cubes position
-        positions = np.array([c.position for c in self.state.cubes])
-        round_positions = np.round(positions / self.state.offset) * self.state.offset
-        rotations = np.array([c.rotation.as_euler("xyz") for c in self.state.cubes])
-        round_rotations = np.round(rotations / np.pi * 2) * np.pi / 2
-        for c, pos, rot in zip(self.state.cubes, round_positions, round_rotations):
-            c.position = pos
-            c.rotation = Rotation.from_euler("xyz", rot)
+        # Resync state.cubes and self.cubes
+        for c, model in zip(self.cubes, self.state.cubes):
+            c.position = model.position * self.offset
+            c.rotation = model.rotation
             c.update_verticies()
 
         self._animation.pop()
@@ -108,24 +102,29 @@ class RubiksCubeDrawer:
 
     def _raise_state_changed(self):
         self.event_hub.raise_event(Event(origin=Event.APPLICATION, type=Event.CUBE_STATE_CHANGED,
-                                         state_str=self.state.compute_state_string(),
+                                         state_str=self.state.state_string,
                                          is_solved=self.state.is_solved()))
 
-    def move_face(self, move):
+    def move(self, move):
         """Start move face animation."""
         face = move[0]
         reverse = "'" in move
         angle = 90 * (1 + ("2" in move))
         self._animation.put(
-            FaceRotationAnimation(face=face, start=pygame.time.get_ticks(),
-                                  current_angle=0, target_angle=angle, reverse=reverse)
+            FaceRotationAnimation(move=move, face=face, start=pygame.time.get_ticks(),
+                                  current_angle=0, target_angle=angle, reverse=reverse
+                                  )
         )
 
     def load_state(self, state_str):
-        self.state.load_state(state_str)
         self._animation.remove_all()
+        self.state.load_state(state_str)
+        self._generate_cubes(self.state.cubes)
+        self._raise_state_changed()
 
     def shuffle(self):
         self._animation.remove_all()
         self.state.shuffle()
+        self._generate_cubes(self.state.cubes)
         self._raise_state_changed()
+

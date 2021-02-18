@@ -4,10 +4,11 @@ import numpy as np
 from scipy.spatial.distance import cdist
 from scipy.spatial.transform.rotation import Rotation
 
-from open_gl.cube import Cube
-from utils import Color
+from rubikscube.cube import Cube
 
 X, Y, Z = np.eye(3, dtype=np.int8)
+ALL_MOVES = ["F", "F'", "R", "R'", "L", "L'", "U", "U'", "D", "D'", "B", "B'"]
+FACE_ORDER = ["U", "R", "F", "D", "L", "B"]
 
 
 def state_str_to_state_description(state_str):
@@ -27,21 +28,22 @@ def state_str_to_state_description(state_str):
     return pattern.format(*ordered)
 
 
-def generate_cubes(offset):
+def generate_cubes():
     cubes = []
     for x in (-1, 0, 1):
         for y in (-1, 0, 1):
             for z in (-1, 0, 1):
                 if x == y == z == 0:
                     continue
-                colors = {"U": Color.WHITE if y == 1 else Color.HIDDEN,
-                          "D": Color.YELLOW if y == -1 else Color.HIDDEN,
-                          "L": Color.BLUE if x == -1 else Color.HIDDEN,
-                          "R": Color.GREEN if x == 1 else Color.HIDDEN,
-                          "F": Color.ORANGE if z == 1 else Color.HIDDEN,
-                          "B": Color.RED if z == -1 else Color.HIDDEN
-                          }
-                pos = [offset * x, offset * y, offset * z]
+                colors = [
+                    "U" if y == 1 else None,
+                    "R" if x == 1 else None,
+                    "F" if z == 1 else None,
+                    "D" if y == -1 else None,
+                    "L" if x == -1 else None,
+                    "B" if z == -1 else None
+                ]
+                pos = np.array([x, y, z])
                 cube = Cube(pos, colors=colors)
                 cubes.append(cube)
     return np.array(cubes)
@@ -96,23 +98,21 @@ def get_face_for_normal(normal):
         raise ValueError(f"No face for normal {normal}")
 
 
-def get_cubes_on_face(cubes, face, offset):
+def get_cube_ids_on_face(cubes, face):
     """Returns the 9 cubes on given face, ordered from top_left to bottom right."""
     normal = get_normal(face)
     up = get_up_on_face(face)
     right = np.cross(up, normal)
-    positions = [offset * (normal + x * right + y * up)
+    positions = [normal + x * right + y * up
                  for y in (1, 0, -1) for x in (-1, 0, 1)]
     current_positions = [c.position for c in cubes]
     dist_matrix = cdist(current_positions, positions)
     cubes_ids = np.where((dist_matrix < 0.1).T)[1]
-    cubes = cubes[cubes_ids]
-    return cubes
+    return cubes_ids
 
 
 def get_color_from_state_str(state_str, pos, direction):
     """Return color letter corresponding to sticker on cube as position pos and in direction direction."""
-    print(pos, direction)
     direction = direction.astype(np.int8)
     offset_for_direction = {tuple(Y): 0, tuple(X): 9, tuple(Z): 18, tuple(-Y): 27, tuple(-X): 36, tuple(-Z): 45}
     axis = np.where(direction != 0)[0][0]
@@ -132,7 +132,6 @@ def get_rot_from_basis(basis):
     """Returns a rotation that sends (X,Y,Z) to the vectors given.
     Vectors can be None to pass no requirement.
     """
-    print(basis)
     basis = list(basis).copy()
     n = sum(i is None for i in basis)
     if n == 1:
@@ -153,7 +152,7 @@ def get_rot_from_basis(basis):
     return Rotation.from_matrix(basis)
 
 
-def generate_cubes_from_state_str(state_str, offset):
+def generate_cubes_from_state_str(state_str):
     # Check valid
     try:
         kociemba.solve(state_str)
@@ -176,14 +175,14 @@ def generate_cubes_from_state_str(state_str, offset):
                     basis[axis] = norm * pos[axis]
 
                 rot = get_rot_from_basis(basis)
-                colors = {
-                    "U": Color.WHITE if y == 1 else Color.HIDDEN,
-                    "D": Color.YELLOW if y == -1 else Color.HIDDEN,
-                    "L": Color.BLUE if x == -1 else Color.HIDDEN,
-                    "R": Color.GREEN if x == 1 else Color.HIDDEN,
-                    "F": Color.ORANGE if z == 1 else Color.HIDDEN,
-                    "B": Color.RED if z == -1 else Color.HIDDEN
-                }
-                cube = Cube(initial_position=offset * pos, initial_rotation=rot, colors=colors)
+                colors = [
+                    "U" if y == 1 else None,
+                    "R" if x == 1 else None,
+                    "F" if z == 1 else None,
+                    "D" if y == -1 else None,
+                    "L" if x == -1 else None,
+                    "B" if z == -1 else None
+                ]
+                cube = Cube(initial_position=pos, initial_rotation=rot, colors=colors)
                 cubes.append(cube)
     return np.array(cubes)

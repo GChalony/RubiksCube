@@ -1,4 +1,5 @@
 import numpy as np
+from OpenGL.GL import *
 from scipy.spatial.transform.rotation import Rotation
 
 from utils import Color
@@ -35,5 +36,31 @@ class Cube:
         self.rotation = rot * self.rotation
         self.position = rot.apply(self.position)
         self.update_verticies()
+
+    def _draw_square(self, corners, color):
+        """Draw a square using """
+        normal = np.cross(corners[3] - corners[0], corners[1] - corners[0])
+        normal = normal / np.linalg.norm(normal)
+        glNormal3fv(tuple(normal))
+        glColor3fv(color)
+        glBegin(GL_QUADS)
+        for vertex in corners:
+            glVertex3fv(tuple(vertex))
+        glEnd()
+        glColor3fv(Color.WHITE)
+
+    def draw(self):
+        for face, surface in self.SURFACES.items():
+            color = self.colors[face]
+            corners = self.verticies[np.array(surface)]
+            self._draw_square(corners, color)
+
+        glBegin(GL_LINES)
+        glColor3fv(Color.BLACK)
+        for edge in self.EDGES:
+            for v in edge:
+                vertex = self.verticies[v] * 1.001
+                glVertex3fv(tuple(vertex))
+        glEnd()
 
 
