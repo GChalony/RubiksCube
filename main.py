@@ -36,6 +36,7 @@ if __name__ == '__main__':
     with profile(on=False):
         event_hub = EventsHub()
         cube = RubiksCubeDrawer(event_hub)
+        cube.state.pprint()
         # cube.load_state(RubiksCube.SOLVED_STR)
 
         camera = Camera(event_hub)

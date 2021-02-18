@@ -29,7 +29,7 @@ class OpenGLApp:
         glTranslatef(0, 0, -10)
 
         glEnable(GL_DEPTH_TEST)
-        glLineWidth(5.0)
+        glLineWidth(20.0)
         glPushMatrix()
 
     def _pygame_event_to_event(self, pg_event):
