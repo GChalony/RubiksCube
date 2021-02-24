@@ -67,7 +67,7 @@ class EventsHub:
     def handle_events(self):
         while not self._events.empty():
             event = self._events.pop()
-            if event.type in [Event.QUIT]:
+            if event.type in [Event.QUIT, Event.NEWFRAME]:
                 # print("Handling", event, self._callbacks.get(event.type, []))
                 pass
             for callback in self._callbacks.get(event.type, []):

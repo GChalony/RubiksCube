@@ -21,16 +21,14 @@ def run_cube_sim():
     while not app.closed:
         app.draw_frame(cube)
 
-        dt = clock.tick(100)
+        dt = clock.tick(30)
         app.event_hub.raise_event(Event(origin=Event.APPLICATION, type=Event.NEWFRAME, dt=dt))
-        app.event_hub.handle_events()
+        event_hub.handle_events()
 
 
 def run_controls_ui():
     dash.mainloop()
 
-
-# TODO thread for event_hub ?
 
 if __name__ == '__main__':
     with profile(on=False):
@@ -49,4 +47,3 @@ if __name__ == '__main__':
 
         run_controls_ui()  # Tkinter needs to be called from main thread
         tCube.join()
-

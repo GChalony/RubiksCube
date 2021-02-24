@@ -38,10 +38,10 @@ class Cube:
         self.update_verticies()
 
     def _draw_square(self, corners, color):
-        """Draw a square using """
-        normal = np.cross(corners[3] - corners[0], corners[1] - corners[0])
-        normal = normal / np.linalg.norm(normal)
-        glNormal3fv(tuple(normal))
+        """Draw a square on an OpenGL canvas."""
+        # normal = np.cross(corners[3] - corners[0], corners[1] - corners[0])
+        # normal = normal / np.linalg.norm(normal)
+        # glNormal3fv(tuple(normal))
         glColor3fv(color)
         glBegin(GL_QUADS)
         for vertex in corners:

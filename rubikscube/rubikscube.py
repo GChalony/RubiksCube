@@ -20,7 +20,7 @@ class RubiksCube:
     """
     SOLVED_STR = "UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB"
     TERM_COLORS = {"U": "\033[48;5;15m", "R": Back.GREEN, "F": "\033[48;5;202m",
-                   "D": "\033[48;5;11m", "L": Back.BLUE, "B": Back.RED}
+                   "D": "\033[48;5;11m", "L": Back.BLUE, "B": "\033[48;5;196m"}
 
     def __init__(self, state=None):
         self.cubes = generate_cubes()
@@ -29,7 +29,7 @@ class RubiksCube:
         self.history_moves = []
 
     def __repr__(self):
-        return self.state_string
+        return f"<Cube: {self.state_string}>"
 
     def __str__(self):
         return state_str_to_state_description(self.state_string)

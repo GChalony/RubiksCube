@@ -14,6 +14,7 @@ class Cube:
 
     def rotate(self, rot):
         """Apply rotation to cube position and orientation."""
+        # TODO ignore UserWarning: Gimbal lock
         self.rotation = rot * self.rotation
         self.rotation = Rotation.from_euler("xyz",
             np.round(self.rotation.as_euler("xyz") / np.pi * 2) * np.pi / 2
