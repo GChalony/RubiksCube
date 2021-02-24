@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 from threading import Lock
-
+import numpy as np
 
 class Color:
     WHITE = (0.9, 0.9, 0.9)
@@ -65,5 +65,20 @@ def profile(on=True):
     stats.print_all()
     yappi.get_thread_stats().print_all()
     print(f"\nTotal wall time: {wall}")
-    print(f"\nTotal CPU time: {cpu}")
+    print(f"Total CPU time: {cpu}")
     print(f"Ratio: {cpu / wall: %}")
+
+
+def angle(v1, v2, ignore_axis=None):
+    if ignore_axis is not None:
+        select = [i for i in range(3) if i != ignore_axis]
+        v1 = v1[select]
+        v2 = v2[select]
+    cosang = np.dot(v1, v2)
+    sinang = np.linalg.det([v1, v2])
+    return np.arctan2(sinang, cosang)
+
+
+def rotate_list(l, n):
+    return l[n:] + l[:n]
+

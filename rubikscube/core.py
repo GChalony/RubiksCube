@@ -186,3 +186,13 @@ def generate_cubes_from_state_str(state_str):
                 cube = Cube(initial_position=pos, initial_rotation=rot, colors=colors)
                 cubes.append(cube)
     return np.array(cubes)
+
+
+def neg_move(move):
+    if len(move) == 0:
+        return ""
+    if "2" in move:
+        return move
+    elif "'" in move:
+        return move[0]
+    return move + "'"
