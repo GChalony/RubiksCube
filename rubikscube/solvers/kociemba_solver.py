@@ -16,10 +16,11 @@ class KociembaSolver:
     def is_solved(self):
         return len(self._solution) == 0
 
-    def compute_solution(self, state, callback):
+    def compute_solution(self, state, callback=None):
         if state == RubiksCube.SOLVED_STR:
             self._solution = ""
             return
         solution = kociemba.solve(state)
         self._solution = solution
-        callback(solution)
+        if callback is not None:
+            callback(solution)
