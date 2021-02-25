@@ -1,8 +1,8 @@
 from time import time
 import pandas as pd
-from rubikscube.rubikscube import RubiksCube
-from rubikscube.solvers.basic_solver import BasicSolver
-from rubikscube.solvers.kociemba_solver import KociembaSolver
+from rubiks_cube.rubikscube import RubiksCube
+from rubiks_cube.solvers.basic_solver import BasicSolver
+from rubiks_cube.solvers.kociemba_solver import KociembaSolver
 
 N = 1000
 
@@ -31,4 +31,4 @@ for i in range(N):
             raise e
 
 df = pd.DataFrame(results)
-df.to_csv(f"solvers_comparison-{N}.csv")
+df.to_csv(f"../../data/solvers_comparison-{N}-v5.csv")

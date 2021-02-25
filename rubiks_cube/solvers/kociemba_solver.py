@@ -1,6 +1,6 @@
 import kociemba
 
-from rubikscube.rubikscube import RubiksCube
+from rubiks_cube.rubikscube import RubiksCube
 
 
 class KociembaSolver:

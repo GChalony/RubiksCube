@@ -1,8 +1,8 @@
 import numpy as np
 from scipy.spatial.transform.rotation import Rotation
 
-from rubikscube.core import get_color_from_state_str, Y, X, Z, get_normal, get_face_for_normal, neg_move
-from rubikscube.rubikscube import RubiksCube
+from rubiks_cube.core import get_color_from_state_str, Y, X, Z, get_normal, get_face_for_normal, neg_move
+from rubiks_cube.rubikscube import RubiksCube
 from utils import angle, profile, rotate_list
 
 
@@ -63,7 +63,7 @@ def is_yellow_cross_oriented(state_str):
     return True
 
 
-def are_yellow_corners_positioned(state_str):
+def is_yellow_corners_positioned(state_str):
     side_faces = ["F", "R", "B", "L"]
     for i, f in enumerate(side_faces):
         n = get_normal(f)
@@ -78,6 +78,10 @@ def are_yellow_corners_positioned(state_str):
         if aim_corner != corner:
             return False
     return True
+
+
+def is_yellow_corners_oriented(state_str):
+    return state_str == RubiksCube.SOLVED_STR
 
 
 def _get_up_turn(v1, v2):
@@ -402,7 +406,7 @@ def orient_yellow_corners(state_str):
         pos = -Y + n + m
         c_down = get_color_from_state_str(state_str, pos, -Y)
         if c_down != "D":
-            print("Diagonal")
+            # print("Diagonal")
             moves = FLIPPED_DOUBLE_CHAIR if c_down == get_face_for_normal(m) else DOUBLE_CHAIR
             return [neg_move(get_face_for_normal(m))] + rotate_moves_about_y(moves, m) + [get_face_for_normal(m)]
     raise ValueError("No misoriented corner: is cube done?")
@@ -438,65 +442,27 @@ def optimise(moves):
 
 
 def solve(state_str):
+    stages = {
+        "White cross": (is_white_cross_done, white_cross),
+        "White corners": (is_white_corners_done, white_corners),
+        "Second crown": (is_second_crown_done, second_crown),
+        "Yellow cross": (is_yellow_cross_done, yellow_cross),
+        "Orienting yellow cross": (is_yellow_cross_oriented, orient_yellow_cross),
+        "Yellow corners": (is_yellow_corners_positioned, yellow_corners),
+        "Orienting yellow corners": (is_yellow_corners_oriented, orient_yellow_corners)
+    }
     c = RubiksCube()
     c.load_state(state_str)
     all_moves = []
-    print("White cross")
-    while not is_white_cross_done(c.state_string):
-        moves = white_cross(c.state_string)
-        all_moves += moves
-        for m in moves:
-            c.move(m)
-    c.pprint()
-    print(c.state_string)
-    print("White corners")
-    while not is_white_corners_done(c.state_string):
-        moves = white_corners(c.state_string)
-        all_moves += moves
-        for m in moves:
-            c.move(m)
-    c.pprint()
-    print(c.state_string)
-    print("Second crown")
-    while not is_second_crown_done(c.state_string):
-        moves = second_crown(c.state_string)
-        all_moves += moves
-        for m in moves:
-            c.move(m)
-    c.pprint()
-    print(c.state_string)
-    print("Yellow cross")
-    while not is_yellow_cross_done(c.state_string):
-        moves = yellow_cross(c.state_string)
-        all_moves += moves
-        for m in moves:
-            c.move(m)
-    c.pprint()
-    print(c.state_string)
-    print("Orienting yellow cross")
-    while not is_yellow_cross_oriented(c.state_string):
-        moves = orient_yellow_cross(c.state_string)
-        all_moves += moves
-        for m in moves:
-            c.move(m)
-    c.pprint()
-    print(c.state_string)
-    print("Position yellow corners")
-    while not are_yellow_corners_positioned(c.state_string):
-        moves = yellow_corners(c.state_string)
-        c.pprint()
-        all_moves += moves
-        for m in moves:
-            c.move(m)
-    c.pprint()
-    print(c.state_string)
-    print("Orienting yellow corners")
-    while not c.is_solved():
-        moves = orient_yellow_corners(c.state_string)
-        all_moves += moves
-        for m in moves:
-            c.move(m)
-    c.pprint()
+    for stage_name, (is_done, compute) in stages.items():
+        print(stage_name)
+        while not is_done(c.state_string):
+            moves = compute(c.state_string)
+            all_moves += moves
+            for m in moves:
+                c.move(m, lazy=True)
+            c._compute_state_string()
+
     print("Number of moves", len(all_moves))
     return " ".join(optimise(all_moves))
 
@@ -514,12 +480,13 @@ class BasicSolver:
         if callback is not None:
             callback(solution)
 
+
 if __name__ == '__main__':
     c = RubiksCube()
     with profile(True):
         for i in range(10):
             c.shuffle()
-            c.pprint()
+            # c.pprint()
             try:
                 moves = solve(c.state_string)
                 # for m in moves.split(" "):
