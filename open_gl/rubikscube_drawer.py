@@ -6,8 +6,9 @@ from pygame.locals import *
 from scipy.spatial.transform import Rotation
 
 from open_gl.cube import Cube
-from rubikscube.core import get_normal, get_cube_ids_on_face, FACE_ORDER
-from rubikscube.rubikscube import RubiksCube
+from rubiks_cube.core import get_normal, get_cube_ids_on_face
+from rubiks_cube.constants import FACE_ORDER
+from rubiks_cube.rubikscube import RubiksCube
 from events_hub import Event, EventsHub
 from utils import Color, Queue
 

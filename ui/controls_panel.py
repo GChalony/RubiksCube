@@ -4,9 +4,9 @@ from tkinter import font
 import Pmw
 import numpy as np
 
-from rubikscube.core import state_str_to_state_description
-from rubikscube.rubikscube import RubiksCube
-from rubikscube.solvers.kociemba_solver import KociembaSolver
+from rubiks_cube.core import state_str_to_state_description
+from rubiks_cube.rubikscube import RubiksCube
+from rubiks_cube.solvers.kociemba_solver import KociembaSolver
 from ui.custom_widgets import SectionTitle, ArrowButton, MoveButton, WrappedLabel, SolverControls, ToggleButton2
 from events_hub import EventsHub, Event
 

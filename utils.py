@@ -81,4 +81,3 @@ def angle(v1, v2, ignore_axis=None):
 
 def rotate_list(l, n):
     return l[n:] + l[:n]
-
