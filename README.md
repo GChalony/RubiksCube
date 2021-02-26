@@ -34,3 +34,7 @@ to represent a RubiksCube, move faces, switch between different representations 
 ## Solvers
 
 Here are some self-explaining charts about each solver's performance.
+
+![number of moves](images/hist_n.png)
+
+![number of moves](images/scatter_time_n.png)
