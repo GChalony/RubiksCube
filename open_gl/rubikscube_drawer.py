@@ -97,12 +97,13 @@ class RubiksCubeDrawer:
             c.update_verticies()
 
         self._animation.pop()
-        self._raise_state_changed()
+        self._raise_state_changed(anim.move)
 
-    def _raise_state_changed(self):
+    def _raise_state_changed(self, prev_move=None):
         self.event_hub.raise_event(Event(origin=Event.APPLICATION, type=Event.CUBE_STATE_CHANGED,
                                          state_str=self.state.state_string,
-                                         is_solved=self.state.is_solved()))
+                                         is_solved=self.state.is_solved(),
+                                         prev_move=prev_move))
 
     def move(self, move):
         """Start move face animation."""

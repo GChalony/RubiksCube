@@ -77,26 +77,36 @@ class SolverControls(Frame):
         super().__init__(master, **kwargs)
         self.title = Label(self, text=name, font=("Arial", 15))
         nf = Frame(self)
-        n_moves_txt = Label(nf, text="Number of moves:")
-        self.n_moves = Label(nf, text="0")
-        n_moves_txt.pack(side=LEFT)
-        self.n_moves.pack(side=LEFT)
-        self.solution = Label(self, text="...", wraplength=150)
+        self.n_moves = Label(nf, text="0", font=("Arial", 12, "bold"))
+        n_moves_txt = Label(nf, text="moves")
+        self.solution = Label(self, text="Solved!", wraplength=220, fg="green", font=("Arial", 7), height=3, anchor='n')
         controls = Frame(self)
-        self.forward = ImagedButton(controls, image_path="images/forward2.png")
-        self.fastforward = ImagedButton(controls, image_path="images/fastforward2.png")
+        self.forward = ImagedButton(controls, image_path="images/forward.png")
+        self.fastforward = ImagedButton(controls, image_path="images/fastforward.png")
 
         self.title.pack()
-        nf.pack()
+        self.n_moves.pack(side=LEFT)
+        n_moves_txt.pack(side=LEFT)
+        nf.pack(pady=5)
         self.solution.pack()
         self.forward.pack(side=LEFT)
         self.fastforward.pack(side=LEFT)
         controls.pack()
 
-    def edit_solution(self, solution, fg=None):
-        self.solution.config(text=solution)
+        self.edit_solution(None)
+
+    def edit_solution(self, solution_arr, fg=None):
+        """If solution_arr=None, considered solved."""
+        if solution_arr is None:
+            txt = "Solved!"
+            fg = "green"
+            n = 0
+        else:
+            txt = " ".join(solution_arr)
+            n = len(solution_arr)
+        self.solution.config(text=txt)
         self.solution.config(fg=fg)
-        self.n_moves.config(text=str(len(solution.split(" "))))
+        self.n_moves.config(text=str(n))
 
 
 class ToggleButton2(Frame):

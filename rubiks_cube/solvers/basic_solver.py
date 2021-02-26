@@ -463,18 +463,33 @@ def solve(state_str):
                 c.move(m, lazy=True)
             c._compute_state_string()
 
-    return " ".join(optimise(all_moves))
+    return optimise(all_moves)
 
 
 class BasicSolver:
     def __init__(self):
         self._solution = ""
 
-    def compute_solution(self, state, callback=None):
+    @property
+    def solution_str(self):
+        return " ".join(self._solution)
+
+    def get_next_move(self, i=0):
+        return self._solution[i] if not self.is_solved() else None
+
+    def get_all_moves(self):
+        return self._solution
+
+    def is_solved(self):
+        return len(self._solution) == 0
+
+    def compute_solution(self, state, prev_move=None, callback=None):
         if state == RubiksCube.SOLVED_STR:
-            self._solution = ""
-            return
-        solution = solve(state)
+            solution = []
+        elif prev_move is not None and len(self._solution) > 1 and self._solution[0] == prev_move:
+            solution = self._solution[1:]
+        else:
+            solution = solve(state)
         self._solution = solution
         if callback is not None:
             callback(solution)

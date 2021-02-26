@@ -6,6 +6,7 @@ import numpy as np
 
 from rubiks_cube.core import state_str_to_state_description
 from rubiks_cube.rubikscube import RubiksCube
+from rubiks_cube.solvers.basic_solver import BasicSolver
 from rubiks_cube.solvers.kociemba_solver import KociembaSolver
 from ui.custom_widgets import SectionTitle, ArrowButton, MoveButton, WrappedLabel, SolverControls, ToggleButton2
 from events_hub import EventsHub, Event
@@ -15,6 +16,7 @@ class Dashboard(tk.Tk):
     def __init__(self, event_hub: EventsHub):
         super().__init__()
         self.kociemba_solver = KociembaSolver()
+        self.basic_solver = BasicSolver()
 
         self.state_tooltip = Pmw.Balloon(self)
         self.state_tooltip.configure(label_font=("Courier", 8))
@@ -121,10 +123,13 @@ class Dashboard(tk.Tk):
         # Solving controls
         self.solving_label = SectionTitle(self, text='Solving')
         self.solving_label.pack(fill=tk.X, ipady=5)
-        basic = SolverControls(self, "Basic Solver")
-        basic.pack()
+        self.basic = SolverControls(self, "Basic Solver")
+        self.tooltip.bind(self.basic.forward, "Next move")
+        self.tooltip.bind(self.basic.fastforward, "All move")
         self.kociemba = SolverControls(self, "Kociemba Solver")
-        self.tooltip.bind(self.kociemba, "Kociemba solution")
+        self.tooltip.bind(self.kociemba.forward, "Next move")
+        self.tooltip.bind(self.kociemba.fastforward, "All move")
+        self.basic.pack()
         self.kociemba.pack()
 
     def copy_state_to_clipboard(self, event=None):
@@ -144,16 +149,25 @@ class Dashboard(tk.Tk):
     def on_state_changed(self, event):
         self.change_state_label(event.state_str)
         if event.is_solved:
-            self.kociemba.edit_solution("Solved!", fg="green")
+            self.kociemba.edit_solution(None)
+            self.basic.edit_solution(None)
         else:
             self.kociemba_solver.compute_solution(event.state_str,
                                                   lambda sol: self.kociemba.edit_solution(sol, fg="black"))
+            self.basic_solver.compute_solution(event.state_str, event.prev_move,
+                                               lambda sol: self.basic.edit_solution(sol, fg="black"))
 
     def apply_all_moves(self, moves):
         for move in moves:
             self.event_hub.raise_event(
                 Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face=move)
             )
+
+    def apply_next_move(self, solver):
+        # TODO check animation queue to avoid redoing same move
+        move = solver.get_next_move()
+        self.event_hub.raise_event(Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE,
+                                         face=move))
 
     def _add_events_raisers(self):
         # Adds all callbacks to hook Tkinter events to event_hub
@@ -180,7 +194,8 @@ class Dashboard(tk.Tk):
                            Event(origin=Event.TKINTER, type=Event.CAMERA_MOVE, direction="DOWN", angle=angle_move))
                        )
         self.rot_toggle.bind("<Button>",
-                             lambda ev: self.event_hub.raise_event(Event(origin=Event.TKINTER, type=Event.CAMERA_TOGGLE_ROT)))
+                             lambda ev: self.event_hub.raise_event(
+                                 Event(origin=Event.TKINTER, type=Event.CAMERA_TOGGLE_ROT)))
 
         self.move_F.bind("<Button>",
                          lambda ev: self.event_hub.raise_event(
@@ -220,12 +235,14 @@ class Dashboard(tk.Tk):
                               Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE, face="R'")))
 
         self.kociemba.forward.bind("<Button>",
-                                   lambda ev: self.event_hub.raise_event(
-                                       Event(origin=Event.TKINTER, type=Event.CUBE_MOVE_FACE,
-                                             face=self.kociemba_solver.get_next_move())
-                                   ))
+                                   lambda ev: self.apply_next_move(self.kociemba_solver))
         self.kociemba.fastforward.bind("<Button>",
-                                   lambda ev: self.apply_all_moves(self.kociemba_solver.get_all_moves()))
+                                       lambda ev: self.apply_all_moves(self.kociemba_solver.get_all_moves()))
+        self.basic.forward.bind("<Button>",
+                                lambda ev: self.apply_next_move(self.basic_solver))
+
+        self.basic.fastforward.bind("<Button>",
+                                    lambda ev: self.apply_all_moves(self.basic_solver.get_all_moves()))
 
     def _add_listeners(self):
         self.event_hub.add_callback(Event.QUIT, lambda ev: self.quit())

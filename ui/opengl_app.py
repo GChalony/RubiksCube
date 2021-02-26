@@ -23,6 +23,7 @@ class OpenGLApp:
         pg.init()
         display = (800, 700)
         pg.display.set_mode(display, DOUBLEBUF | OPENGL)
+        pg.display.set_caption("RubiksCube Simulator")
 
         # Camera view
         gluPerspective(30, (display[0] / display[1]), 0.1, 50.0)
