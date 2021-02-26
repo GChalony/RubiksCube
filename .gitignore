@@ -1,8 +1,9 @@
 .idea
 
-*/**/__pycache__
+**/__pycache__
+**/.pytest_cache
 
-images
+images/not_versioned
 prototyping
 
 data
