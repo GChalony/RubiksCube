@@ -23,6 +23,11 @@ class RubiksCube:
     SOLVED_STR = "UUUUUUUUURRRRRRRRRFFFFFFFFFDDDDDDDDDLLLLLLLLLBBBBBBBBB"
     TERM_COLORS = {"U": "\033[48;5;15m", "R": Back.GREEN, "F": "\033[48;5;202m",
                    "D": "\033[48;5;11m", "L": Back.BLUE, "B": "\033[48;5;196m"}
+    ORDERED_CUBES_POSITIONS = [np.array([x, y, z])
+                               for x in (-1, 0, 1)
+                               for y in (-1, 0, 1)
+                               for z in (-1, 0, 1)
+                               if not (x == y == z == 0)]
 
     def __init__(self, state=None):
         self.cubes: List[Cube] = generate_cubes()

@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from threading import Lock
 import numpy as np
 
+
 class Color:
     WHITE = (0.9, 0.9, 0.9)
     BLACK = (0, 0, 0)
@@ -14,6 +15,7 @@ class Color:
     ORANGE = (1, 0.4, 0)
     GRAY = (0.3, 0.3, 0.3)
     HIDDEN = BLACK
+    EDGE = BLACK
 
 
 class Queue:

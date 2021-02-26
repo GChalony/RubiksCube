@@ -7,12 +7,12 @@ from utils import Color
 
 class Cube:
     SURFACES = {
-        "U": (2, 3, 7, 6),
-        "D": (4, 5, 1, 0),
-        "L": (0, 1, 3, 2),
-        "R": (6, 7, 5, 4),
-        "F": (1, 5, 7, 3),
-        "B": (4, 0, 2, 6)
+        "U": [2, 3, 7, 6],
+        "D": [4, 5, 1, 0],
+        "L": [0, 1, 3, 2],
+        "R": [6, 7, 5, 4],
+        "F": [1, 5, 7, 3],
+        "B": [4, 0, 2, 6]
     }
     EDGES = [(0, 1), (0, 2), (0, 4), (1, 3), (1, 5), (2, 3), (2, 6),
              (3, 7), (4, 5), (4, 6), (5, 7), (6, 7)]
@@ -47,16 +47,15 @@ class Cube:
         for vertex in corners:
             glVertex3fv(tuple(vertex))
         glEnd()
-        glColor3fv(Color.WHITE)
 
     def draw(self):
         for face, surface in self.SURFACES.items():
             color = self.colors[face]
-            corners = self.verticies[np.array(surface)]
+            corners = self.verticies[surface]
             self._draw_square(corners, color)
 
         glBegin(GL_LINES)
-        glColor3fv(Color.BLACK)
+        glColor3fv(Color.EDGE)
         for edge in self.EDGES:
             for v in edge:
                 vertex = self.verticies[v] * 1.001

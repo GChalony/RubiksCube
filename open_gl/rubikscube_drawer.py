@@ -6,7 +6,7 @@ from pygame.locals import *
 from scipy.spatial.transform import Rotation
 
 from open_gl.cube import Cube
-from rubiks_cube.core import get_normal, get_cube_ids_on_face
+from rubiks_cube.core import get_normal, get_cube_ids_on_face, get_permutation
 from rubiks_cube.constants import FACE_ORDER
 from rubiks_cube.rubikscube import RubiksCube
 from events_hub import Event, EventsHub
@@ -22,18 +22,11 @@ class FaceRotationAnimation:
     current_angle: float
     target_angle: float
     reverse: bool
+    double: bool
     cubes: list = None
 
 
 class RubiksCubeDrawer:
-    COLORS = {
-        "U": Color.WHITE,
-        "D": Color.YELLOW,
-        "L": Color.BLUE,
-        "R": Color.GREEN,
-        "F": Color.ORANGE,
-        "B": Color.RED
-    }
     offset = 1.02
 
     def __init__(self, event_hub: EventsHub):
@@ -49,11 +42,13 @@ class RubiksCubeDrawer:
         These two lists should remain synced at all times... or should they?
         """
         cubes = []
-        for c in state_cubes:
-            x, y, z = c.position
-            colors = {FACE_ORDER[i]: self.COLORS[v] if v is not None else Color.HIDDEN
+        for c, position in zip(state_cubes, RubiksCube.ORDERED_CUBES_POSITIONS):
+            colors = {FACE_ORDER[i]: Cube.COLORS[FACE_ORDER[i]] if v else Color.HIDDEN
                       for i, v in enumerate(c.colors)}
-            cubes.append(Cube(self.offset * c.position, c.rotation, colors=colors))
+            cube = Cube(initial_position=self.offset * position,
+                        initial_rotation=Rotation.from_matrix(c.rotation.as_matrix()),
+                        colors=colors)
+            cubes.append(cube)
         self.cubes = np.array(cubes)
 
     def _add_listeners(self):
@@ -73,8 +68,8 @@ class RubiksCubeDrawer:
         if self._animation.empty():
             return
         anim = self._animation.peek()  # Get current face animation
-        if anim.current_angle == 0:  # If first frame
-            cube_ids = get_cube_ids_on_face(self.state.cubes, anim.face)
+        if anim.current_angle == 0:    # If first frame
+            cube_ids = get_cube_ids_on_face(anim.face)
             anim.cubes = self.cubes[cube_ids]
             self.state.move(anim.move)
 
@@ -93,9 +88,12 @@ class RubiksCubeDrawer:
 
     def _finish_animation(self):
         # Resync state.cubes and self.cubes
-        for c, model in zip(self.cubes, self.state.cubes):
-            c.position = model.position * self.offset
-            c.rotation = model.rotation
+        anim = self._animation.peek()
+        permutation = get_permutation(anim.face, anim.reverse, anim.double)
+        self.cubes = self.cubes[permutation]  # Reorder cubes
+        for c, model, position in zip(self.cubes, self.state.cubes, RubiksCube.ORDERED_CUBES_POSITIONS):
+            c.position = position * self.offset
+            c.rotation = Rotation.from_matrix(model.rotation.as_matrix())
             c.update_verticies()
 
         self._animation.pop()
@@ -113,7 +111,7 @@ class RubiksCubeDrawer:
         angle = 90 * (1 + ("2" in move))
         self._animation.put(
             FaceRotationAnimation(move=move, face=face, start=pygame.time.get_ticks(),
-                                  current_angle=0, target_angle=angle, reverse=reverse
+                                  current_angle=0, target_angle=angle, reverse=reverse, double="2" in move
                                   )
         )
 
