@@ -84,7 +84,6 @@ class RubiksCube:
     def shuffle(self, n=30):
         possible_moves = ALL_MOVES
         moves = np.random.choice(possible_moves, n)
-        print("Shuffling: ", " ".join(moves))
         for move in moves:
             self.move(move)
         return moves

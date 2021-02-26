@@ -463,7 +463,6 @@ def solve(state_str):
                 c.move(m, lazy=True)
             c._compute_state_string()
 
-    print("Number of moves", len(all_moves))
     return " ".join(optimise(all_moves))
 
 

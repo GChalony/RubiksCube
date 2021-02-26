@@ -4,7 +4,7 @@ from functools import lru_cache
 import numpy as np
 
 from rubiks_cube.constants import Z, X, Y, FACE_ORDER, NORMAL_FOR_FACE
-from rubiks_cube.cubic_mathematic import CubicRotation, invert_permutation
+from rubiks_cube.cubic_mathematics import CubicRotation, invert_permutation
 
 
 def state_str_to_state_description(state_str):
@@ -43,27 +43,28 @@ def get_up_on_face(face):
 
 # @lru_cache(maxsize=6)
 def get_face_for_normal(normal):
-    x, y, z = normal
-    if x > 0.9:
+    if normal[0] > 0.9:
         return "R"
-    elif x < -0.9:
+    elif normal[0] < -0.9:
         return "L"
-    elif y > 0.9:
+    elif normal[1] > 0.9:
         return "U"
-    elif y < -0.9:
+    elif normal[1] < -0.9:
         return "D"
-    elif z > 0.9:
+    elif normal[2] > 0.9:
         return "F"
-    elif z < -0.9:
+    elif normal[2] < -0.9:
         return "B"
     else:
         raise ValueError(f"No face for normal {normal}")
 
 
+offset_for_direction = {tuple(Y): 0, tuple(X): 9, tuple(Z): 18, tuple(-Y): 27, tuple(-X): 36, tuple(-Z): 45}
+
+
 def get_color_from_state_str(state_str, pos, direction):
     """Return color letter corresponding to sticker on cube as position pos and in direction direction."""
     direction = direction.astype(np.int8)
-    offset_for_direction = {tuple(Y): 0, tuple(X): 9, tuple(Z): 18, tuple(-Y): 27, tuple(-X): 36, tuple(-Z): 45}
     axis = np.where(direction != 0)[0][0]
     assert pos[axis] == direction[axis]  # Check valid face for cube
     up = get_up_on_face(get_face_for_normal(direction))

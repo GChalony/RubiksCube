@@ -12,6 +12,8 @@ class CubicRotation:
 
     @staticmethod
     def from_rotvec(rotvec):
+        if np.linalg.norm(rotvec) < np.pi - 1e-6:
+            print(f"Warning: rotvec too small? {rotvec}")
         return CubicRotation(Rotation.from_rotvec(rotvec).as_matrix())
 
     def as_matrix(self):
@@ -28,7 +30,7 @@ class CubicRotation:
         return CubicRotation(np.eye(3))
 
     def __mul__(self, other):
-        assert isinstance(other, CubicRotation)
+        # assert isinstance(other, CubicRotation)
         return CubicRotation(np.dot(self.matrix, other.matrix))
 
     def __repr__(self):
@@ -44,6 +46,7 @@ class CubicRotation:
 CubicRotation.rx = CubicRotation.from_rotvec(np.pi / 2 * X)
 CubicRotation.ry = CubicRotation.from_rotvec(np.pi / 2 * Y)
 CubicRotation.rz = CubicRotation.from_rotvec(np.pi / 2 * Z)
+
 
 def invert_permutation(perm):
     matrix = np.eye(len(perm), dtype=bool)[perm]

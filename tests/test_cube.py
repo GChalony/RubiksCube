@@ -2,7 +2,7 @@ import numpy as np
 
 from rubiks_cube.constants import Y, X, Z, FACE_ORDER
 from rubiks_cube.cube import Cube, generate_cubes_from_state_str, generate_cubes
-from rubiks_cube.cubic_mathematic import CubicRotation
+from rubiks_cube.cubic_mathematics import CubicRotation
 from rubiks_cube.rubikscube import RubiksCube
 
 
@@ -43,7 +43,7 @@ def test_generate_cubes_from_state_str():
     cube.shuffle()
     cubes = generate_cubes_from_state_str(cube.state_string)
     for c, cc in zip(cubes, cube.cubes):
-        if len([col for col in cc.colors if col is not None]) > 1:
+        if sum(cc.colors) > 1:
             # Don't test face centers
             assert c.rotation == cc.rotation
         assert c.colors == cc.colors

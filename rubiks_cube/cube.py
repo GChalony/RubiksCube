@@ -3,7 +3,7 @@ import numpy as np
 
 from rubiks_cube.constants import FACE_ORDER
 from rubiks_cube.core import get_normal, get_face_for_normal, get_color_from_state_str, get_rot_from_basis
-from rubiks_cube.cubic_mathematic import CubicRotation
+from rubiks_cube.cubic_mathematics import CubicRotation
 
 
 class Cube:
@@ -13,7 +13,7 @@ class Cube:
     """
     def __init__(self, initial_rotation=None, colors=None, id=None):
         self.rotation: CubicRotation = CubicRotation() if initial_rotation is None else initial_rotation
-        self.colors = colors   # TODO needed ? Change to boolean array
+        self.colors = colors  # Boolean array identifying the colors shown
         self.id = -1 if id is None else id
 
     def rotate(self, rot):
@@ -41,12 +41,12 @@ def generate_cubes():
                 if x == y == z == 0:
                     continue
                 colors = [
-                    "U" if y == 1 else None,
-                    "R" if x == 1 else None,
-                    "F" if z == 1 else None,
-                    "D" if y == -1 else None,
-                    "L" if x == -1 else None,
-                    "B" if z == -1 else None
+                    y == 1,   # U
+                    x == 1,   # R
+                    z == 1,   # F
+                    y == -1,  # D
+                    x == -1,  # L
+                    z == -1   # B
                 ]
                 cube = Cube(colors=colors, id=id)
                 cubes.append(cube)
@@ -71,13 +71,13 @@ def generate_cubes_from_state_str(state_str, check=False):
                     continue
                 pos = np.array([x, y, z])
 
-                colors = [None] * 6
+                colors = [False] * 6
                 basis = [None] * 3
                 for axis in np.where(pos != 0)[0]:
                     color = get_color_from_state_str(state_str, pos, pos[axis] * base[axis])
                     norm = get_normal(color)
                     basis[axis] = norm * pos[axis]
-                    colors[FACE_ORDER.index(color)] = color
+                    colors[FACE_ORDER.index(color)] = True
 
                 rot = get_rot_from_basis(basis)
                 original_pos = rot.apply(pos)
